@@ -1,36 +1,18 @@
 
 import {
-  FileQuestion,
-  Settings,
-} from "lucide-react"
-import {
     SidebarGroup,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    useSidebar,
 } from "@/components/ui/sidebar"
+import { AdminOptions } from "@/lib/data"
 
-const items = [
-    {
-        name: "设置",
-        url: "/setting",
-        icon: Settings,
-    },
-    {
-        name: "帮助",
-        url: "/help",
-        icon: FileQuestion,
-    }
-]
 
 export function AdminOption() {
-    const { isMobile } = useSidebar()
-
     return (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
             <SidebarMenu>
-                {items.map((item) => (
+                {AdminOptions.map((item) => (
                     <SidebarMenuItem key={item.name}>
                         <SidebarMenuButton asChild>
                             <a href={item.url}>

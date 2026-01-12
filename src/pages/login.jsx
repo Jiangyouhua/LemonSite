@@ -8,14 +8,13 @@ import SiteLogo from "@/components/site-logo"
 
 export default function LoginPage() {
     const [, setUser] = useLocalStorage();
-    const [, setToken] = useLocalStorage();
 
     const handleSubmit = (event) => {
         API.login.post(event).then( (result) =>{
             if (result.Succeed) {
                 const data = result.Data
                 setUser(data);
-                setToken(data.Token);
+                localStorage.setItem("token", data.Token);
                 window.location = "/admin"
                 toast.success("登录成功")
             } else {

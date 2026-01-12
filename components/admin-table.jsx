@@ -17,7 +17,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Pen } from "lucide-react"
+import { Pen, Plus } from "lucide-react"
 import {
     Pagination,
     PaginationContent,
@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 
-export default function AdminTable({total, items, dict, loadData, showDetail }) {
+export default function AdminTable({total, items, dict, loadData, showDetail, addItem }) {
     const [loaded, setLoaded] = useState(false)
     const [page, setPage] = useState(0) // 当前页
     const [limit, setLimit] = useState(10)  // 各页数
@@ -101,13 +101,14 @@ export default function AdminTable({total, items, dict, loadData, showDetail }) 
     return (
         <div>
             <div className="flex items-center py-4">
+                <Button onClick={addItem} size="icon" variant="outline" className="mr-4"><Plus /></Button>
                 <ContentInputer inputChange={inputChange} />
                 <ColumnSelecter columns={columns} selectChange={selectChange} />
             </div>
             <div className="overflow-hidden rounded-md border">
                 <Table>
                     <HeadTabler columns={columns} dict={dict} />
-                    <BodyTabler text={text} rows={items} columns={columns} showDetail={showDetail} />
+                    <BodyTabler text={text} rows={items} columns={columns} dict={dict} showDetail={showDetail} />
                 </Table>
             </div>
             <div className="flex items-center py-4">
@@ -155,7 +156,7 @@ export function HeadTabler({ columns, dict }) {
                 <TableHead key='head_index' className="text-center">序号</TableHead>
                 {columns.map((column) => (
                     <TableHead key={"head_" + column.name} className={column.checked ? 'visible' : 'hidden'} >
-                        {dict[column.name] ?? column.name}
+                        {dict[column.name].name ?? column.name}
                     </TableHead>
                 ))}
                 <TableHead key='head_edit' className="text-center">编辑</TableHead>
@@ -164,7 +165,7 @@ export function HeadTabler({ columns, dict }) {
     )
 }
 
-export function BodyTabler({ text, rows, columns, showDetail }) {
+export function BodyTabler({ text, rows, columns, dict, showDetail }) {
     return (
         <TableBody>
             {rows.filter((row) => {
@@ -187,7 +188,7 @@ export function BodyTabler({ text, rows, columns, showDetail }) {
                     <TableCell key={"row_index_" + index} className="text-center"> {index} </TableCell>
                     {columns.map((column) => (
                         <TableCell key={'row_' + column.name + "_" + index} className={column.checked ? 'visible' : 'hidden'}>
-                            {row[column.name]}
+                            {dict[column.name].cell(row[column.name])}
                         </TableCell>
                     ))}
                     <TableCell key={"row_edit_" + index} className="items-center content-center text-center">
