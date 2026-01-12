@@ -41,14 +41,14 @@ export default function FormImage({ column, holder, value }) {
     return (
         <div className='flex' >
             <div className="grow"></div>
-            <div className="relative size-20 text-left">
+            <div className="relative size-30 text-left">
                 <Button className="absolute z-10 rounded-full" variant="default" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!disabled) }}  >
                     {disabled ? <Lock /> : <Pen />}
                 </Button>
                 <div>
                     <AlertDialog>
-                        <AlertDialogTrigger disabled={disabled}>
-                            <Avatar className="absolute size-30 z-0 offset">
+                        <AlertDialogTrigger className="" disabled={disabled}>
+                            <Avatar className="size-30 z-0">
                                 <AvatarImage src={url} alt={column} />
                                 <AvatarFallback>{holder.slice(0, 1)}</AvatarFallback>
                             </Avatar>
