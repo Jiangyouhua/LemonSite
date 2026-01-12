@@ -55,7 +55,7 @@ export default function UsersPage() {
         })
     }
 
-    const savedData = function () {
+    const finishSave = function () {
         loadData(offset, limit, function () {
             setOpen(false)
         })
@@ -108,7 +108,7 @@ export default function UsersPage() {
                         <DialogTitle>用户信息</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={user} saved={savedData} />
+                    <ProfileForm item={user} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
@@ -119,9 +119,6 @@ export function ProfileForm({ item, saved }) {
     const userChange = function (event) {
         API.userChange.post(event).then((result) => {
             if (result.Succeed) {
-                const user = result.Data
-                localStorage.setItem("user", JSON.stringify(user))
-                toast.success("更新成功")
                 saved()
             } else {
                 toast.error("更新失败，请稍后再试")

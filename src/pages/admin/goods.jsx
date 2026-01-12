@@ -85,9 +85,7 @@ export function ProfileForm({ item, saved }) {
     const goodsChange = function (event) {
         API.goodsChange.post(event).then((result) => {
             if (result.Succeed) {
-                const user = result.Data
-                localStorage.setItem("user", JSON.stringify(user))
-                toast.success("更新成功")
+                // TODO
                 saved()
             } else {
                 toast.error("更新失败，请稍后再试")

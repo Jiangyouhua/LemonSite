@@ -7,14 +7,16 @@ import { useLocalStorage } from "@uidotdev/usehooks";
 import SiteLogo from "@/components/site-logo"
 
 export default function LoginPage() {
-    const [, setUser] = useLocalStorage();
+    const [, setUser] = useLocalStorage("user")
+    const [, setAuth] = useLocalStorage("auth")
 
     const handleSubmit = (event) => {
         API.login.post(event).then( (result) =>{
             if (result.Succeed) {
                 const data = result.Data
                 setUser(data);
-                localStorage.setItem("token", data.Token);
+                setAuth(!!data.Token && data.Token.length > 0 )
+                localStorage.setItem("token", data.Token)
                 window.location = "/admin"
                 toast.success("登录成功")
             } else {
