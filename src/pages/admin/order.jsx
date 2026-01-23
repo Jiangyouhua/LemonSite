@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
 import { API } from "@/lib/api"
 import { Seer } from "@/lib/seer"
@@ -18,41 +17,30 @@ import AdminTable from "@/components/admin-table"
 import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
-import FormAvatar from "@/components/Form-avatar"
-import CellAvatar from "@/components/cell-avatar"
 
-const statusTags = ['未设置', '会员', '管理员', '超级管理员', '冻结'].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', "待付款", "待发货", "待收货", "取消", "退款"].map((item, index) => { return { ID: index, Name: item } })
+const kindTags = ['未设置', "兑换", "购买"].map((item, index) => { return { ID: index, Name: item } })
 // {name: 表头显示名称， show:表列是否显示，cell: 表列格式}
 const tableKeys = {
     ID: Seer(0, "ID", true),
-    AvatarURL: Seer("", "头像", true, (v) => <CellAvatar url={v} />),
-    Name: Seer("", "姓名", true),
-    RealName: Seer("", "真实姓名", true),
-    CardID: Seer("", "身份证号码"),
-    Phone: Seer("", "手机", true),
-    Email: Seer("", "邮箱", true),
-    LoginPassword: Seer("", "登录密码"),
-    TransactionPassword: Seer("", "交易密码"),
-    Score: Seer(0, "积分", true),
-    Money: Seer(0, "金额", true),
-    Withdrawal: Seer(0, "提现", true),
-    TopUp: Seer(0, "充值", true),
-    AddressID: (0, "默认地址ID"),
-    BankID: (0, "默认银行ID"),
-    Alipay: Seer("", "支付宝"),
-    Weichat: Seer("", "微信"),
-    Token: Seer("", "Token"),
+    UserID: Seer(0, "用户ID"),
+    GoodsID: Seer(0, "商品ID"),
+    Kind: Seer(0, "获取方式", true),
+    Quantity: Seer(0, "数量", true),
+    Amount: Seer(0, "金额", true),
+    Decount: Seer(0, "折扣", true),
+    DecountDescription: Seer("", "折扣说明", true),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
-export default function UsersPage() {
+export default function OrderPage() {
     const [open, setOpen] = useState(false)
-    const [user, setUser] = useState()
+    const [order, setOrder] = useState()
     const [data, setData] = useState({ total: 0, items: [] })
     const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
 
     const loadData = (offset, limit, key, value, back) => {
-        API.userAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.orderAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
             if (result.Succeed) {
                 setPagination({offset:offset, limit: limit, key: key, value:value})
                 setData(result.Data)
@@ -71,17 +59,8 @@ export default function UsersPage() {
         })
     }
 
-    const showDetail = (_user) => {
-        setUser(_user)
-        setOpen(true)
-    }
-
-    const addItem = () => {
-        let _user = {}
-        Object.entries(tableKeys).forEach(([k, v]) => {
-            _user[k] = v.value
-        })
-        setUser(_user)
+    const showDetail = (_order) => {
+        setOrder(_order)
         setOpen(true)
     }
 
@@ -95,7 +74,6 @@ export default function UsersPage() {
                         dict={tableKeys}
                         loadData={loadData}
                         showDetail={showDetail}
-                        addItem={addItem}
                     />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
@@ -103,7 +81,7 @@ export default function UsersPage() {
                         <DialogTitle>用户信息</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={user} saved={finishSave} />
+                    <ProfileForm item={order} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
@@ -111,13 +89,9 @@ export default function UsersPage() {
 }
 
 export function ProfileForm({ item, saved }) {
-    const [user, setUser] = useLocalStorage("user")
-    const userUpdate = function (event) {
-        API.userUpdate.post(event).then((result) => {
+    const orderUpdate = function (event) {
+        API.orderUpdate.post(event).then((result) => {
             if (result.Succeed) {
-                if (result.Data.ID === user.ID) {
-                    setUser(result.Data)
-                }
                 saved()
             } else {
                 toast.error("更新失败，请稍后再试")
@@ -128,22 +102,17 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={userUpdate} >
+        <form className="grid items-start gap-6" onSubmit={orderUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
                     <div className="text-center">
-                        <FormAvatar name="头像" column="AvatarURL" holder={item.Name} value={item.AvatarURL} />
                         <FormText name="ID" column="ID" value={item.ID} />
                     </div>
-                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
-                    <FormInput name={tableKeys.RealName.name} column="RealName" value={item.RealName} />
-                    <FormInput name={tableKeys.Phone.name} column="Phone" value={item.Phone} />
-                    <FormInput name={tableKeys.Email.name} column="Email" value={item.Email} />
-                    <FormInput name="登录密码" column="LoginPassword" value="" />
-                    <FormInput name="交易密码" column="RransactionPassword" value="" />
-                    <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" />
-                    <FormInput name={tableKeys.Money.name} column="Money" value={item.Money} type="number" />
-                    <FormInput name={tableKeys.Withdrawal.name} column="Withdrawal" value={item.Withdrawal} type="number" />
+                    <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
+                    <FormInput name={tableKeys.Quantity.name} column="Quantity" value={item.Quantity} type="number" />
+                    <FormInput name={tableKeys.Amount.name} column="Amount" value={item.Amount} type="number" />
+                    <FormInput name={tableKeys.Decount.name} column="Decount" value={item.Decount} type="number" />
+                    <FormInput name={tableKeys.DecountDescription.name} column="DecountDescription" value={item.DecountDescription} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

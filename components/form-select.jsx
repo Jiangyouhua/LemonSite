@@ -11,14 +11,14 @@ import {
 import { Pen, Lock } from "lucide-react"
 import { Input } from "./ui/input"
 
-export default function FormSelect({ name, column, value, tags }) {
+// options = [{ID: int, Name: string}]
+export default function FormSelect({ name, column, value, options }) {
+    const placeholder = !value ? "请选择" : options.find((_option) => _option.ID == value).Name
     const [disabled, setDisabled] = useState(true)
     const [option, setOption] = useState(value)
-    const selectChange = function(_value) {
-        const i = tags.indexOf(_value)
-        if (i >= 0) {
-            setOption(i)
-        }
+
+    const selectUpdate = function (_value) {
+        setOption(options.find((_option) => _option.Name == _value).ID)
     }
     return (
         <div className="grid gap-0 py-2">
@@ -27,15 +27,15 @@ export default function FormSelect({ name, column, value, tags }) {
                     {disabled ? <Lock /> : <Pen />}
                 </Button>
                 {name}:
-                <Input type="number" size="icon" className='invisible w-16' name={column} value={option} onChange={()=>{}} />    
+                <Input type="number" size="icon" disabled={disabled} className='invisible w-16' name={column} value={option} />
             </Label>
-            <Select disabled={disabled} onValueChange={(_value)=>{selectChange(_value)}} >
+            <Select disabled={disabled} onValueUpdate={(_value) => { selectUpdate(_value) }} >
                 <SelectTrigger className="w-full">
-                    <SelectValue placeholder={tags[value]} />
+                    <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
-                    {tags.map((tag, index) => {
-                        return (<SelectItem key={column + "_" + index} value={tag}>{tag}</SelectItem>)
+                    {options.map((_option) => {
+                        return (<SelectItem key={column + "_" + _option.ID} value={_option.Name}>{_option.Name}</SelectItem>)
                     })}
                 </SelectContent>
             </Select>

@@ -16,12 +16,11 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
-import { useState } from "react"
 import { AdminMenus } from '../lib/data'
 
 export function AdminMenu() {
     const location = useLocation();
-    const pathname = useState(location.pathname ?? "/user")
+    const pathname = location.pathname ?? "/user"
 
     return (
         <SidebarGroup>
@@ -31,7 +30,7 @@ export function AdminMenu() {
                     <Collapsible
                         key={item.title}
                         asChild
-                        defaultOpen={item.items.filter((it) => it.url === pathname).length > 0}
+                        defaultOpen={item.items.filter((it) => new URL(it.url, "http:/localhost").pathname === pathname).length > 0}
                         className="group/collapsible"
                     >
                         <SidebarMenuItem>

@@ -8,7 +8,7 @@ export default function CellAvatar({ url }) {
     return (
     <Avatar className="size-10">
         <AvatarImage src={url} />
-        <AvatarFallback>LM</AvatarFallback>
+        <AvatarFallback>IMG</AvatarFallback>
     </Avatar>
     )
 }
