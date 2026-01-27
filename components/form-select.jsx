@@ -8,11 +8,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Pen, Lock } from "lucide-react"
+import { Pen, Lock, Shield } from "lucide-react"
 import { Input } from "./ui/input"
 
 // options = [{ID: int, Name: string}]
-export default function FormSelect({ name, column, value, options }) {
+export default function FormSelect({ name, column, value, options, block }) {
     const placeholder = !value ? "请选择" : options.find((_option) => _option.ID == value).Name
     const [disabled, setDisabled] = useState(true)
     const [option, setOption] = useState(value)
@@ -22,14 +22,14 @@ export default function FormSelect({ name, column, value, options }) {
     }
     return (
         <div className="grid gap-0 py-2">
-            <Label htmlFor={column}>
-                <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!disabled) }}  >
-                    {disabled ? <Lock /> : <Pen />}
+            <Label>
+                <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
+                    {disabled ? ( !block ? <Lock /> : <Shield />) : <Pen />}
                 </Button>
                 {name}:
                 <Input type="number" size="icon" disabled={disabled} className='invisible w-16' name={column} value={option} />
             </Label>
-            <Select disabled={disabled} onValueUpdate={(_value) => { selectUpdate(_value) }} >
+            <Select disabled={disabled} onValueChange={(_value) => { selectUpdate(_value) }} >
                 <SelectTrigger className="w-full">
                     <SelectValue placeholder={placeholder} />
                 </SelectTrigger>

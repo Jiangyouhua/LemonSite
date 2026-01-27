@@ -30,7 +30,7 @@ export function AdminMenu() {
                     <Collapsible
                         key={item.title}
                         asChild
-                        defaultOpen={item.items.filter((it) => new URL(it.url, "http:/localhost").pathname === pathname).length > 0}
+                        defaultOpen={item.children.filter((it) => new URL(it.url, "http:/localhost").pathname === pathname).length > 0}
                         className="group/collapsible"
                     >
                         <SidebarMenuItem>
@@ -43,7 +43,7 @@ export function AdminMenu() {
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                                 <SidebarMenuSub>
-                                    {item.items?.map((subItem) => (
+                                    {item.children?.map((subItem) => (
                                         <SidebarMenuSubItem key={subItem.title}>
                                             <SidebarMenuSubButton asChild>
                                                 <a href={subItem.url}>

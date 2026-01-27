@@ -1,6 +1,7 @@
-import AdminTable from "@/components/admin-table"
+import { useState, useEffect } from "react"
+import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API } from "@/lib/api"
+import { API } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -12,7 +13,7 @@ import {
     DialogTrigger,
     DialogDescription,
 } from "@/components/ui/dialog"
-import { useState } from "react"
+import AdminTable from "@/components/admin-table"
 import FormAvatar from "@/components/Form-avatar"
 import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
@@ -40,17 +41,25 @@ const tableKeys = {
 export default function GoodsPage() {
     const [open, setOpen] = useState(false)
     const [goods, setGoods] = useState()
-    const [data, setData] = useState({ total: 0, items: [] })
+    const [data, setData] = useState({ Total: 0, Items: [] })
     const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
+    const [, setNavs] = useLocalStorage("navs", [])
+
+    useEffect(() => {
+        setNavs([
+            { name: "商品管理", url: "/admin" },
+            { name: "商品明细", url: "/admin/goods" },
+        ])
+    }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
         API.goodsAll.get({ limit: limit, offset: offset }).then((result) => {
             if (result.Succeed) {
                 setPagination({offset:offset, limit: limit, key: key, value:value})
                 setData(result.Data)
-                back(result.Data.total)
+                back(result.Data.Total)
             } else {
-                toast.error("邮箱或密码错误")
+                toast.error("数据加载失败，请稍后再试")
             }
         }).catch((error) => {
             console.error(error)
@@ -63,7 +72,7 @@ export default function GoodsPage() {
         })
     }
 
-    const showDetail = (_goods) => {
+    const editDetail = (_goods) => {
         setGoods(_goods)
         setOpen(true)
     }
@@ -79,20 +88,20 @@ export default function GoodsPage() {
 
     return (
         <div className="mx-4 w-auto">
-            <Dialog open={open} onOpenUpdate={setOpen}>
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <AdminTable
-                        total={data.total}
-                        items={data.items}
+                        total={data.Total}
+                        items={data.Items}
                         dict={tableKeys}
                         loadData={loadData}
-                        showDetail={showDetail}
+                        actions={[{name: "编辑内容", func: editDetail}]}
                         addItem={addItem}
                     />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>商品信息</DialogTitle>
+                        <DialogTitle>编辑内容</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={goods} saved={finishSave} />
@@ -110,7 +119,7 @@ export function ProfileForm({ item, saved }) {
             if (result.Succeed) {
                 saved()
             } else {
-                toast.error("更新失败，请稍后再试")
+                toast.error("数据更新失败，请稍后再试")
             }
         }).catch((error) => {
             console.error(error)
@@ -120,7 +129,7 @@ export function ProfileForm({ item, saved }) {
     const goodsPromotional = function (back) {
         API.goodsPromotional.get().then((result) => {
             if (result.Succeed) {
-                if (!result.Data) {
+                if (!result.Data || !back) {
                     return 
                 }
                 back(result.Data)
@@ -133,7 +142,7 @@ export function ProfileForm({ item, saved }) {
     const goodsTags = function (back) {
         API.goodsTags.get().then((result) => {
             if (result.Succeed) {
-                if (!result.Data) {
+                if (!result.Data || !back) {
                     return 
                 }
                 back(result.Data)
@@ -160,8 +169,8 @@ export function ProfileForm({ item, saved }) {
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Slogan.name} column="Slogan" value={item.Slogan} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
-                    <FormTags name={tableKeys.Promotional.name} column="Promotional" value={item.Promotional} optionWords={goodsPromotional} />
                     <FormTags name={tableKeys.Tags.name} column="Tags" value={item.Tags} optionWords={goodsTags} />
+                    <FormTags name={tableKeys.Promotional.name} column="Promotional" value={item.Promotional} optionWords={goodsPromotional} />
                     <FormInput name={tableKeys.Price.name} column="Price" value={item.Price} type="number" />
                     <FormInput name={tableKeys.PriceExplanation.name} column="PriceExplanation" value={item.PriceExplanation} />
                     <FormInput name={tableKeys.Inventory.name} column="Inventory" value={item.Inventory} type="number" />

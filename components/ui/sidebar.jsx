@@ -45,7 +45,7 @@ function useSidebar() {
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
-  onOpenUpdate: setOpenProp,
+  onOpenChange: setOpenProp,
   className,
   style,
   children,
@@ -155,7 +155,7 @@ function Sidebar({
 
   if (isMobile) {
     return (
-      <Sheet open={openMobile} onOpenUpdate={setOpenMobile} {...props}>
+      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
           data-sidebar="sidebar"
           data-slot="sidebar"

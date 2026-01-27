@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API } from "@/lib/api"
+import { API, urlParams } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -19,10 +20,9 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
-// {name: 表头显示名称， show:表列是否显示，cell: 表列格式}
+
 const tableKeys = {
     ID: Seer(0, "ID", true),
-    UserID: Seer(0, "用户ID"),
     Name: Seer("", "收件人", true),
     Bank: Seer("", "银行", true),
     Branch: Seer("", "分行", true),
@@ -33,17 +33,26 @@ const tableKeys = {
 export default function BankPage() {
     const [open, setOpen] = useState(false)
     const [bank, setBank] = useState()
-    const [data, setData] = useState({ total: 0, items: [] })
+    const [data, setData] = useState({ Total: 0, Items: [] })
     const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
+    const [, setNavs] = useLocalStorage("navs", [])
+
+    useEffect(() => {
+        setNavs([
+            { name: "用户管理", url: "/admin" },
+            { name: "用户明细", url: "/admin/user" },
+            { name:`${urlParams.get("user_name")}的银行账号`, url: location },
+        ])
+    }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.bankAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.bankUser.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
             if (result.Succeed) {
                 setPagination({offset:offset, limit: limit, key: key, value:value})
                 setData(result.Data)
-                back(result.Data.total)
+                back(result.Data.Total)
             } else {
-                toast.error("邮箱或密码错误")
+                toast.error("数据加载失败，请稍后再试")
             }
         }).catch((error) => {
             toast.error(error)
@@ -56,42 +65,52 @@ export default function BankPage() {
         })
     }
 
-    const showDetail = (_bank) => {
+    const editDetail = (_bank) => {
         setBank(_bank)
         setOpen(true)
     }
 
+    const addItem = () => {
+            let _bank = {UserID: urlParams.get("user_id")}
+            Object.entries(tableKeys).forEach(([k, v]) => {
+                _bank[k] = v.value
+            })
+            setBank(_bank)
+            setOpen(true)
+        }
+
     return (
         <div className="mx-4 w-auto">
-            <Dialog open={open} onOpenUpdate={setOpen}>
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <AdminTable
-                        total={data.total}
-                        items={data.items}
+                        total={data.Total}
+                        items={data.Items}
                         dict={tableKeys}
                         loadData={loadData}
-                        showDetail={showDetail}
+                        actions={[{name: "编辑内容", func: editDetail}]}
+                        addItem={addItem}
                     />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>用户信息</DialogTitle>
+                        <DialogTitle>编辑内容</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={bank} saved={finishSave} />
+                    <ProfileForm item={bank} saved={finishSave} /> 
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+export function ProfileForm({ item, saved, edit }) {
     const bankUpdate = function (event) {
         API.bankUpdate.post(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
-                toast.error("更新失败，请稍后再试")
+                toast.error("数据更新失败，请稍后再试")
             }
         }).catch((error) => {
             console.error(error)
@@ -99,17 +118,17 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={bankUpdate} >
+        <form className="grid items-start gap-6" onSubmit={bankUpdate} aria-disabled={!edit}>
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
                     <div className="text-center">
                         <FormText name="ID" column="ID" value={item.ID} />
                     </div>
-                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
-                    <FormInput name={tableKeys.Bank.name} column="Bank" value={item.Bank} />
-                    <FormInput name={tableKeys.Branch.name} column="Branch" value={item.Branch} />
-                    <FormInput name={tableKeys.Account.name} column="Account" value={item.Account} />
-                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
+                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name}  />
+                    <FormInput name={tableKeys.Bank.name} column="Bank" value={item.Bank}  />
+                    <FormInput name={tableKeys.Branch.name} column="Branch" value={item.Branch}  />
+                    <FormInput name={tableKeys.Account.name} column="Account" value={item.Account}  />
+                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags}  />
                 </div>
             </ScrollArea>
             <Button type="submit">保存更新</Button>

@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API } from "@/lib/api"
+import { API, urlParams } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -19,10 +20,9 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
-// {name: 表头显示名称， show:表列是否显示，cell: 表列格式}
+
 const tableKeys = {
     ID: Seer(0, "ID", true),
-    UserID: Seer(0, "用户ID"),
     Name: Seer("", "收件人", true),
     Phone: Seer("", "联系电话", true),
     Province: Seer("", "省（自冶区）", true),
@@ -36,17 +36,26 @@ const tableKeys = {
 export default function AddressPage() {
     const [open, setOpen] = useState(false)
     const [address, setAddress] = useState()
-    const [data, setData] = useState({ total: 0, items: [] })
-    const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
+    const [data, setData] = useState({ Total: 0, Items: [] })
+    const [pagination, setPagination] = useState({ offset: 0, limit: 0, key: "", value: "" })
+    const [, setNavs] = useLocalStorage("navs", [])
+
+    useEffect(() => {
+        setNavs([
+            { name: "用户管理", url: "/admin" },
+            { name: "用户明细", url: "/admin/user" },
+            { name: `${urlParams.get("user_name")}的收货地址`, url: location },
+        ])
+    }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.addressAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.addressUser.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
             if (result.Succeed) {
-                setPagination({offset:offset, limit: limit, key: key, value:value})
+                setPagination({ offset: offset, limit: limit, key: key, value: value })
                 setData(result.Data)
-                back(result.Data.total)
+                back(result.Data.Total)
             } else {
-                toast.error("邮箱或密码错误")
+                toast.error("数据加载失败，请稍后再试")
             }
         }).catch((error) => {
             toast.error(error)
@@ -59,26 +68,36 @@ export default function AddressPage() {
         })
     }
 
-    const showDetail = (_address) => {
+    const editDetail = (_address) => {
+        setAddress(_address)
+        setOpen(true)
+    }
+
+    const addItem = () => {
+        let _address = { UserID: urlParams.get("user_id") }
+        Object.entries(tableKeys).forEach(([k, v]) => {
+            _address[k] = v.value
+        })
         setAddress(_address)
         setOpen(true)
     }
 
     return (
         <div className="mx-4 w-auto">
-            <Dialog open={open} onOpenUpdate={setOpen}>
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <AdminTable
-                        total={data.total}
-                        items={data.items}
+                        total={data.Total}
+                        items={data.Items}
                         dict={tableKeys}
                         loadData={loadData}
-                        showDetail={showDetail}
+                        actions={[{ name: "编辑内容", func: editDetail }]}
+                        addItem={addItem}
                     />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>用户信息</DialogTitle>
+                        <DialogTitle>编辑内容</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={address} saved={finishSave} />
@@ -88,13 +107,13 @@ export default function AddressPage() {
     )
 }
 
-export function ProfileForm({ item, saved }) {
+export function ProfileForm({ item, saved, edit }) {
     const addressUpdate = function (event) {
         API.addressUpdate.post(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
-                toast.error("更新失败，请稍后再试")
+                toast.error("数据更新失败，请稍后再试")
             }
         }).catch((error) => {
             console.error(error)
@@ -102,7 +121,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={addressUpdate} >
+        <form className="grid items-start gap-6" onSubmit={addressUpdate} aria-disabled={!edit}>
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
                     <div className="text-center">

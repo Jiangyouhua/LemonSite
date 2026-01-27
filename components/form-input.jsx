@@ -2,16 +2,16 @@ import { useState } from "react";
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from "@/components/ui/label"
-import { Pen, Lock } from "lucide-react"
+import { Pen, Lock, Shield } from "lucide-react"
 
-export default function FormInput({ name, column, value }) {
+export default function FormInput({ name, column, value, block }) {
     const _type = typeof value === 'number' ? "number" : "text"
     const [disabled, setDisabled] = useState(true)
     return (
         <div className="grid gap-0 py-2">
-            <Label htmlFor={column}>
-                <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!disabled) }}  >
-                    {disabled ? <Lock /> : <Pen />}
+            <Label>
+                <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!block ? !disabled : true)}}  >
+                    {disabled ? ( !block ? <Lock /> : <Shield />) : <Pen />}
                 </Button>
                 {name}:
             </Label>

@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API } from "@/lib/api"
+import { API } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -19,7 +20,7 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
 const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { ID: index, Name: item } })
-// {name: 表头显示名称， show:表列是否显示，cell: 表列格式}
+
 const tableKeys = {
     ID: Seer(0, "ID", true),
     UserID: Seer(0, "用户ID"),
@@ -28,20 +29,28 @@ const tableKeys = {
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
-export default function MoneyPage() {
+export default function MoneyPage({kind, name, url}) {
     const [open, setOpen] = useState(false)
     const [money, setMoney] = useState()
-    const [data, setData] = useState({ total: 0, items: [] })
+    const [data, setData] = useState({ Total: 0, Items: [] })
     const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
+    const [, setNavs] = useLocalStorage("navs", [])
+
+    useEffect(() => {
+        setNavs([
+            { name: "现金管理", url: "/admin" },
+            { name: name, url: url },
+        ])
+    }, [setNavs]) 
 
     const loadData = (offset, limit, key, value, back) => {
-        API.moneyAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        ({"topup": API.moneyTopUp, "withdrawal": API.moneyWithdrawal})[kind].get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
             if (result.Succeed) {
                 setPagination({offset:offset, limit: limit, key: key, value:value})
                 setData(result.Data)
-                back(result.Data.total)
+                back(result.Data.Total)
             } else {
-                toast.error("邮箱或密码错误")
+                toast.error("数据加载失败，请稍后再试")
             }
         }).catch((error) => {
             toast.error(error)
@@ -54,26 +63,26 @@ export default function MoneyPage() {
         })
     }
 
-    const showDetail = (_money) => {
+    const editDetail = (_money) => {
         setMoney(_money)
         setOpen(true)
     }
 
     return (
         <div className="mx-4 w-auto">
-            <Dialog open={open} onOpenUpdate={setOpen}>
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <AdminTable
-                        total={data.total}
-                        items={data.items}
+                        total={data.Total}
+                        items={data.Items}
                         dict={tableKeys}
                         loadData={loadData}
-                        showDetail={showDetail}
+                        actions={[{name: "编辑内容", func: editDetail}]}
                     />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>用户信息</DialogTitle>
+                        <DialogTitle>编辑内容</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={money} saved={finishSave} />
@@ -89,7 +98,7 @@ export function ProfileForm({ item, saved }) {
             if (result.Succeed) {
                 saved()
             } else {
-                toast.error("更新失败，请稍后再试")
+                toast.error("数据更新失败，请稍后再试")
             }
         }).catch((error) => {
             console.error(error)
@@ -103,7 +112,7 @@ export function ProfileForm({ item, saved }) {
                     <div className="text-center">
                         <FormText name="ID" column="ID" value={item.ID} />
                     </div>
-                    <FormInput name={tableKeys.Amonut.name} column="Amonut" value={item.Amonut} />
+                    <FormInput name={tableKeys.Amonut.name} column="Amonut" value={item.Amonut} block={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

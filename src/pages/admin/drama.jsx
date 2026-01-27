@@ -1,0 +1,188 @@
+import { useState, useEffect } from "react"
+import { useLocalStorage } from "@uidotdev/usehooks"
+import { toast } from "sonner"
+import { API } from "@/src/API"
+import { Seer } from "@/lib/seer"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogDescription,
+} from "@/components/ui/dialog"
+import AdminTable from "@/components/admin-table"
+import FormAvatar from "@/components/Form-avatar"
+import FormText from "@/components/form-text"
+import FormInput from "@/components/form-input"
+import FormSelect from "@/components/form-select"
+import CellAvatar from "@/components/cell-avatar"
+import FormTags from "@/components/form-tags"
+import { Play } from "lucide-react"
+import { Form } from "react-router-dom"
+
+const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => {return {ID:index, Name: item}})
+
+const tableKeys = {
+    ID: Seer(0, "ID", true),
+    Name: Seer("", "名称", true),
+    Author: Seer("", "作者", true),
+    Publisher: Seer("", "出版社", true),
+    ISBN: Seer("", "ISBN", true),
+    ImageURL: Seer("", "产品图片", true, (v) => <CellAvatar url={v} />),
+    ReleaseDate: Seer("", "发布日期", true),
+    Slogan: Seer("", "广告语", true),
+    Description: Seer("", "说明", true),
+    Promotional: Seer("", "促销语", true),
+    Tags: Seer("", "分类标签", true),
+    ChatperCount: Seer(0, "章节数", true),
+    Score: Seer(0, "评分", true),
+    Like: Seer(0, "喜欢数", true),
+    Collect: Seer(0, "收藏数", true),
+    Play: Seer(0, "播放数", true),
+    Recommendation: Seer(0, "推荐数", true),
+    Status: Seer("", "状态", true, (v) => statusTags[v].Name),
+}
+
+export default function DramaPage() {
+    const [open, setOpen] = useState(false)
+    const [drama, setDrama] = useState()
+    const [data, setData] = useState({ Total: 0, Items: [] })
+    const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
+    const [, setNavs] = useLocalStorage("navs", [])
+
+    useEffect(() => {
+        setNavs([
+            { name: "短剧管理", url: "/admin" },
+            { name: "短剧明细", url: "/admin/drama" },
+        ])
+    }, [setNavs]) 
+
+    const loadData = (offset, limit, key, value, back) => {
+        API.dramaAll.get({ limit: limit, offset: offset }).then((result) => {
+            if (result.Succeed) {
+                setPagination({offset:offset, limit: limit, key: key, value:value})
+                setData(result.Data)
+                back(result.Data.Total)
+            } else {
+                toast.error("数据加载失败，请稍后再试")
+            }
+        }).catch((error) => {
+            console.error(error)
+        })
+    }
+
+    const finishSave = function () {
+        loadData(pagination.offset, pagination.limit, pagination.key, pagination.value, function () {
+            setOpen(false)
+        })
+    }
+
+    const editDetail = (_drama) => {
+        setDrama(_drama)
+        setOpen(true)
+    }
+
+    const editChildren = (_drama) => {
+        window.location = "/admin/chapter?drama_id=" + _drama.ID + "&drama_name=" + encodeURIComponent(_drama.Name) 
+    }
+
+    const addItem = () => {
+        let _drama = {}
+        Object.entries(tableKeys).forEach(([k, v]) => {
+            _drama[k] = v.value
+        })
+        setDrama(_drama)
+        setOpen(true)
+    }
+
+    return (
+        <div className="mx-4 w-auto">
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                    <AdminTable
+                        total={data.Total}
+                        items={data.Items}
+                        dict={tableKeys}
+                        loadData={loadData}
+                        actions={[{name: "编辑内容", func: editDetail}]}
+                        editChildren={editChildren}
+                        addItem={addItem}
+                    />
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-140">
+                    <DialogHeader>
+                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogDescription>点击锁图标，可编辑</DialogDescription>
+                    </DialogHeader>
+                    <ProfileForm item={drama} saved={finishSave} />
+                </DialogContent>
+            </Dialog>
+        </div>
+    )
+}
+
+export function ProfileForm({ item, saved }) {
+    const [load, setLoad] = useState(false)
+
+    const dramaUpdate = function (event) {
+        API.dramaUpdate.post(event).then((result) => {
+            if (result.Succeed) {
+                saved()
+            } else {
+                toast.error("数据更新失败，请稍后再试")
+            }
+        }).catch((error) => {
+            console.error(error)
+        })
+    }
+
+    const dramaTags = function (back) {
+        API.dramaTags.get().then((result) => {
+            if (result.Succeed) {
+                if (!result.Data || !back) {
+                    return 
+                }
+                back(result.Data)
+            } else {
+                console.error(result.Message)
+            }
+        })
+    }
+
+    if (!load){
+        setLoad(true)
+        dramaTags()
+    }
+
+    return (
+        <form className="grid items-start gap-6" onSubmit={dramaUpdate} >
+            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
+                <div className="px-[4px] ">
+                    <div className="text-center">
+                        <FormAvatar name={item.Name} column="ImageURL" value={item.ImageURL} />
+                        <FormText name="ID" column="ID" value={item.ID} />
+                    </div>
+                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
+                    <FormInput name={tableKeys.Author.name} column="Author" value={item.Author} />
+                    <FormInput name={tableKeys.Publisher.name} column="Publisher" value={item.Publisher} />
+                    <FormInput name={tableKeys.ISBN.name} column="ISBN" value={item.ISBN} />
+                    <FormInput name={tableKeys.ReleaseDate.name} column="ReleaseDate" value={item.ReleaseDate} type="date" />
+                    <FormInput name={tableKeys.Slogan.name} column="Slogan" value={item.Slogan} />
+                    <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
+                    <FormTags name={tableKeys.Tags.name} column="Tags" value={item.Tags} optionWords={dramaTags} />
+                    <FormInput name={tableKeys.ChatperCount.name} column="ChatperCount" value={item.ChatperCount} type="number" />
+                    <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" step="0.1" />
+                    <FormInput name={tableKeys.Like.name} column="Like" value={item.Like} type="number" />
+                    <FormInput name={tableKeys.Collect.name} column="Collect" value={item.Collect} type="number" />
+                    <FormInput name={tableKeys.Play.name} column="Play" value={item.Play} type="number" />
+                    <FormInput name={tableKeys.Recommendation.name} column="Recommendation" value={item.Recommendation} type="number" />
+                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
+                </div>
+            </ScrollArea>
+            <Button type="submit">保存更新</Button>
+        </form>
+    )
+}

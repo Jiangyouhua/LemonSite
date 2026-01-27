@@ -2,7 +2,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { API } from "@/lib/api"
+import { API } from "@/src/API"
 import { useLocalStorage } from "@uidotdev/usehooks";
 import SiteLogo from "@/components/site-logo"
 

@@ -27,7 +27,7 @@ const TagsContext = createContext({
   value: undefined,
   setValue: undefined,
   open: false,
-  onOpenUpdate: () => { },
+  onOpenChange: () => { },
   width: undefined,
   setWidth: undefined,
 });
@@ -44,7 +44,7 @@ export const Tags = ({
   value,
   setValue,
   open: controlledOpen,
-  onOpenUpdate: controlledOnOpenUpdate,
+  onOpenChange: controlledOnOpenChange,
   children,
   className,
 }) => {
@@ -52,7 +52,7 @@ export const Tags = ({
   const [width, setWidth] = useState();
   const ref = useRef(null);
   const open = controlledOpen ?? uncontrolledOpen;
-  const onOpenUpdate = controlledOnOpenUpdate ?? setUncontrolledOpen;
+  const onOpenChange = controlledOnOpenChange ?? setUncontrolledOpen;
   useEffect(() => {
     if (!ref.current) {
       return;
@@ -67,9 +67,9 @@ export const Tags = ({
   }, []);
   return (
     <TagsContext.Provider
-      value={{ value, setValue, open, onOpenUpdate, width, setWidth }}
+      value={{ value, setValue, open, onOpenChange, width, setWidth }}
     >
-      <Popover onOpenUpdate={onOpenUpdate} open={open}>
+      <Popover onOpenChange={onOpenChange} open={open}>
         <div className={cn('relative w-full', className)} ref={ref}>
           {children}
         </div>

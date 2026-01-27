@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API } from "@/lib/api"
+import { API } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -19,29 +20,38 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
 const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { ID: index, Name: item } })
-// {name: 表头显示名称， show:表列是否显示，cell: 表列格式}
+const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
+
 const tableKeys = {
     ID: Seer(0, "ID", true),
-    UserID: Seer(0, "用户ID"),
-    BankID: Seer(0, "银行ID"),
-    Amonut: Seer(0, "金额", true),
+    User: Seer(0, "用户", true, (v) => v.Name),
+    Group: Seer(0, "用户组", true, (v) => groupTags[v].Name),
+    Content: Seer("", "金额", true),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
-export default function MessagePage() {
+export default function MessageSystemPage() {
     const [open, setOpen] = useState(false)
     const [message, setMessage] = useState()
-    const [data, setData] = useState({ total: 0, items: [] })
+    const [data, setData] = useState({ Total: 0, Items: [] })
     const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
+    const [, setNavs] = useLocalStorage("navs", [])
+
+    useEffect(() => {
+        setNavs([
+            { name: "信息管理", url: "/admin" },
+            { name: "系统信息", url: "/admin/message_system" },
+        ])
+    }, [setNavs]) 
 
     const loadData = (offset, limit, key, value, back) => {
-        API.messageAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.messageToSystem.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
             if (result.Succeed) {
                 setPagination({offset:offset, limit: limit, key: key, value:value})
                 setData(result.Data)
-                back(result.Data.total)
+                back(result.Data.Total)
             } else {
-                toast.error("邮箱或密码错误")
+                toast.error("数据加载失败，请稍后再试")
             }
         }).catch((error) => {
             toast.error(error)
@@ -54,26 +64,26 @@ export default function MessagePage() {
         })
     }
 
-    const showDetail = (_message) => {
+    const editDetail = (_message) => {
         setMessage(_message)
         setOpen(true)
     }
 
     return (
         <div className="mx-4 w-auto">
-            <Dialog open={open} onOpenUpdate={setOpen}>
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <AdminTable
-                        total={data.total}
-                        items={data.items}
+                        total={data.Total}
+                        items={data.Items}
                         dict={tableKeys}
                         loadData={loadData}
-                        showDetail={showDetail}
+                        actions={[{name: "编辑内容", func: editDetail}]}
                     />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>用户信息</DialogTitle>
+                        <DialogTitle>编辑内容</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={message} saved={finishSave} />
@@ -89,7 +99,7 @@ export function ProfileForm({ item, saved }) {
             if (result.Succeed) {
                 saved()
             } else {
-                toast.error("更新失败，请稍后再试")
+                toast.error("数据更新失败，请稍后再试")
             }
         }).catch((error) => {
             console.error(error)

@@ -23,7 +23,8 @@ export default function AdminSider({ ...props }) {
         <AdminMenu />
       </SidebarContent>
       <SidebarFooter>
-        <AdminOption />
+        <small className="text-center">Version 1.0.0 </small>
+        {/* <AdminOption /> */}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

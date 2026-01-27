@@ -1,5 +1,4 @@
 'use client'
-import { useLocation } from "react-router-dom"
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -11,11 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import AdminUser from "@/components/admin-user"
 
-export default function AdminHeader() {
-    const location = useLocation();
-    const pathname = location.pathname
-    const items = pathname.split("/")
-    items.shift()
+export default function AdminHeader({ navs }) {
     return (
         <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
             <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -26,8 +21,8 @@ export default function AdminHeader() {
                 />
                 <Breadcrumb>
                     <BreadcrumbList>
-                        {items.map((_, index) => (
-                           <ItemRow key={index} items={items} index={index} />
+                        {navs.map((nav, index) => (
+                            <NavItem key={"nav_" + index} nav={nav} index={index} />
                         ))}
                     </BreadcrumbList>
                 </Breadcrumb>
@@ -40,23 +35,18 @@ export default function AdminHeader() {
     )
 }
 
-export function ItemRow({ items, index }) {
-    const item = items[index]
+function NavItem({ nav, index }) {
+    if (!nav) {
+        return <></>
+    }
     return (
         <>
-            <RightArrow index={index} />
-            <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={"/" + items.slice(0, index + 1).join("/")}>
-                    {item}
+            {index > 0 ? <BreadcrumbSeparator /> : <></>}
+            <BreadcrumbItem>
+                <BreadcrumbLink href={nav.url}>
+                    {nav.name}
                 </BreadcrumbLink>
             </BreadcrumbItem>
         </>
     )
-}
-
-export function RightArrow({ index }) {
-    if (index > 0) {
-        return (<BreadcrumbSeparator className="hidden md:block" />)
-    }
-    return <></>
 }

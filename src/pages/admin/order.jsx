@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API } from "@/lib/api"
+import { API } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -20,14 +21,14 @@ import FormSelect from "@/components/form-select"
 
 const statusTags = ['未设置', "待付款", "待发货", "待收货", "取消", "退款"].map((item, index) => { return { ID: index, Name: item } })
 const kindTags = ['未设置', "兑换", "购买"].map((item, index) => { return { ID: index, Name: item } })
-// {name: 表头显示名称， show:表列是否显示，cell: 表列格式}
+
 const tableKeys = {
     ID: Seer(0, "ID", true),
     UserID: Seer(0, "用户ID"),
     GoodsID: Seer(0, "商品ID"),
-    Kind: Seer(0, "获取方式", true),
+    Kind: Seer(0, "支付方式", true),
     Quantity: Seer(0, "数量", true),
-    Amount: Seer(0, "金额", true),
+    Amount: Seer(0, "总额", true),
     Decount: Seer(0, "折扣", true),
     DecountDescription: Seer("", "折扣说明", true),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
@@ -36,17 +37,25 @@ const tableKeys = {
 export default function OrderPage() {
     const [open, setOpen] = useState(false)
     const [order, setOrder] = useState()
-    const [data, setData] = useState({ total: 0, items: [] })
+    const [data, setData] = useState({ Total: 0, Items: [] })
     const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
+    const [, setNavs] = useLocalStorage("navs", [])
+
+    useEffect(() => {
+        setNavs([
+            { name: "商品管理", url: "/admin" },
+            { name: "订单明细", url: "/admin/order" },
+        ])
+    }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
         API.orderAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
             if (result.Succeed) {
                 setPagination({offset:offset, limit: limit, key: key, value:value})
                 setData(result.Data)
-                back(result.Data.total)
+                back(result.Data.Total)
             } else {
-                toast.error("邮箱或密码错误")
+                toast.error("数据加载失败，请稍后再试")
             }
         }).catch((error) => {
             toast.error(error)
@@ -59,26 +68,26 @@ export default function OrderPage() {
         })
     }
 
-    const showDetail = (_order) => {
+    const editDetail = (_order) => {
         setOrder(_order)
         setOpen(true)
     }
 
     return (
         <div className="mx-4 w-auto">
-            <Dialog open={open} onOpenUpdate={setOpen}>
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <AdminTable
-                        total={data.total}
-                        items={data.items}
+                        total={data.Total}
+                        items={data.Items}
                         dict={tableKeys}
                         loadData={loadData}
-                        showDetail={showDetail}
+                        actions={[{name: "编辑内容", func: editDetail}]}
                     />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>用户信息</DialogTitle>
+                        <DialogTitle>编辑内容</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={order} saved={finishSave} />
@@ -94,7 +103,7 @@ export function ProfileForm({ item, saved }) {
             if (result.Succeed) {
                 saved()
             } else {
-                toast.error("更新失败，请稍后再试")
+                toast.error("数据更新失败，请稍后再试")
             }
         }).catch((error) => {
             console.error(error)
@@ -108,11 +117,11 @@ export function ProfileForm({ item, saved }) {
                     <div className="text-center">
                         <FormText name="ID" column="ID" value={item.ID} />
                     </div>
-                    <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
-                    <FormInput name={tableKeys.Quantity.name} column="Quantity" value={item.Quantity} type="number" />
-                    <FormInput name={tableKeys.Amount.name} column="Amount" value={item.Amount} type="number" />
-                    <FormInput name={tableKeys.Decount.name} column="Decount" value={item.Decount} type="number" />
-                    <FormInput name={tableKeys.DecountDescription.name} column="DecountDescription" value={item.DecountDescription} />
+                    <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} block={true}/>
+                    <FormInput name={tableKeys.Quantity.name} column="Quantity" value={item.Quantity} type="number" block={true} />
+                    <FormInput name={tableKeys.Amount.name} column="Amount" value={item.Amount} type="number" block={true}/>
+                    <FormInput name={tableKeys.Decount.name} column="Decount" value={item.Decount} type="number" block={true}/>
+                    <FormInput name={tableKeys.DecountDescription.name} column="DecountDescription" value={item.DecountDescription} block={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

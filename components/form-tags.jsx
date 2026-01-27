@@ -13,10 +13,9 @@ import {
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Pen, Lock } from "lucide-react"
-import { CheckIcon, PlusIcon } from 'lucide-react';
+import { Pen, Lock, Shield, CheckIcon, PlusIcon } from "lucide-react"
 
-export default function FormTags({ name, column, value, optionWords }) {
+export default function FormTags({ name, column, value, optionWords, block }) {
     const [disabled, setDisabled] = useState(true)
     const [items, setItems] = useState(value)
     const selectedWords = function(_words) {
@@ -25,9 +24,9 @@ export default function FormTags({ name, column, value, optionWords }) {
 
     return (
         <div className="grid gap-0 py-2">
-            <Label htmlFor={column}>
-                <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!disabled) }}  >
-                    {disabled ? <Lock /> : <Pen />}
+            <Label>
+                <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
+                    {disabled ? ( !block ? <Lock /> : <Shield />) : <Pen />}
                 </Button>
                 {name}:
             </Label>
@@ -35,7 +34,7 @@ export default function FormTags({ name, column, value, optionWords }) {
                 return (<Input type='hidden' id={column} name={`${column}.${index}`} disabled={disabled} defaultValue={item} />)
             })}
             
-            <TagSelect disabled={disabled} optionWords={optionWords}  selectedWords={selectedWords} />
+            <TagSelect id={column}  disabled={disabled} optionWords={optionWords}  selectedWords={selectedWords} />
         </div>
     )
 }
@@ -90,7 +89,7 @@ const TagSelect = ({ disabled, optionWords, selectedWords }) => {
                 ))}
             </TagsTrigger>
             <TagsContent>
-                <TagsInput onValueUpdate={setNewTag} placeholder="输入搜索..." />
+                <TagsInput onValueChange={setNewTag} placeholder="输入搜索..." />
                 <TagsList>
                     <TagsEmpty>
                         <button

@@ -18,12 +18,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Pen, Lock } from "lucide-react"
+import { Pen, Lock, Shield } from "lucide-react"
 import { useState } from "react"
 import { Resource } from "@/lib/resource"
 import { toast } from "sonner"
 
-export default function FormAvatar({ column, name, value, isImage }) {
+export default function FormAvatar({ column, name, value, isImage, block }) {
     const [disabled, setDisabled] = useState(true)
     const [url, setUrl] = useState(value)
 
@@ -43,9 +43,9 @@ export default function FormAvatar({ column, name, value, isImage }) {
     if (isImage) {
         return (
             <div className="grid gap-0 py-2">
-                <Label htmlFor={column}>
-                    <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!disabled) }}  >
-                        {disabled ? <Lock /> : <Pen />}
+                <Label >
+                    <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
+                        {disabled ? ( !block ? <Lock /> : <Shield />) : <Pen />}
                     </Button>
                     {name}:
                 </Label>

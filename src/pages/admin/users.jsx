@@ -1,7 +1,7 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API } from "@/lib/api"
+import { API } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -20,9 +20,10 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import FormAvatar from "@/components/Form-avatar"
 import CellAvatar from "@/components/cell-avatar"
+import { StatusTags } from "@/lib/data"
 
-const statusTags = ['未设置', '会员', '管理员', '超级管理员', '冻结'].map((item, index) => { return { ID: index, Name: item } })
-// {name: 表头显示名称， show:表列是否显示，cell: 表列格式}
+const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
+
 const tableKeys = {
     ID: Seer(0, "ID", true),
     AvatarURL: Seer("", "头像", true, (v) => <CellAvatar url={v} />),
@@ -42,23 +43,32 @@ const tableKeys = {
     Alipay: Seer("", "支付宝"),
     Weichat: Seer("", "微信"),
     Token: Seer("", "Token"),
-    Status: Seer("", "状态", true, (v) => statusTags[v].Name),
+    Group: Seer(0, "用户组", true, (v) => groupTags[v].Name),
+    Status: Seer("", "状态", true, (v) => StatusTags[v].Name),
 }
 
 export default function UsersPage() {
     const [open, setOpen] = useState(false)
     const [user, setUser] = useState()
-    const [data, setData] = useState({ total: 0, items: [] })
-    const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
+    const [data, setData] = useState({ Total: 0, Items: [] })
+    const [pagination, setPagination] = useState({ offset: 0, limit: 0, key: "", value: "" })
+    const [, setNavs] = useLocalStorage("navs", [])
+
+    useEffect(() => {
+        setNavs([
+            { name: "用户管理", url: "/admin" },
+            { name: "用户明细", url: "/admin/user" },
+        ])
+    }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
         API.userAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
             if (result.Succeed) {
-                setPagination({offset:offset, limit: limit, key: key, value:value})
+                setPagination({ offset: offset, limit: limit, key: key, value: value })
                 setData(result.Data)
-                back(result.Data.total)
+                back(result.Data.Total)
             } else {
-                toast.error("邮箱或密码错误")
+                toast.error("数据加载失败，请稍后再试")
             }
         }).catch((error) => {
             toast.error(error)
@@ -71,9 +81,17 @@ export default function UsersPage() {
         })
     }
 
-    const showDetail = (_user) => {
+    const editDetail = (_user) => {
         setUser(_user)
         setOpen(true)
+    }
+
+    const showAddress = (_user) => {
+        window.location = "/admin/address?user_id=" + _user.ID + "&user_name=" + _user.Name
+    }
+
+    const showBank = (_user) => {
+        window.location = "/admin/bank?user_id=" + _user.ID + "&user_name=" + _user.Name
     }
 
     const addItem = () => {
@@ -87,30 +105,30 @@ export default function UsersPage() {
 
     return (
         <div className="mx-4 w-auto">
-            <Dialog open={open} onOpenUpdate={setOpen}>
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <AdminTable
-                        total={data.total}
-                        items={data.items}
+                        total={data.Total}
+                        items={data.Items}
                         dict={tableKeys}
                         loadData={loadData}
-                        showDetail={showDetail}
+                        actions={[ { name: "编辑内容", func: editDetail }, { name: "收货地址", func: showAddress }, { name: "银行账号", func: showBank },]}
                         addItem={addItem}
                     />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>用户信息</DialogTitle>
+                        <DialogTitle>编辑内容</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={user} saved={finishSave} />
+                    <ProfileForm item={user} saved={finishSave} /> 
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+export function ProfileForm({ item, saved, edit }) {
     const [user, setUser] = useLocalStorage("user")
     const userUpdate = function (event) {
         API.userUpdate.post(event).then((result) => {
@@ -120,7 +138,7 @@ export function ProfileForm({ item, saved }) {
                 }
                 saved()
             } else {
-                toast.error("更新失败，请稍后再试")
+                toast.error("数据数据更新失败，请稍后再试")
             }
         }).catch((error) => {
             console.error(error)
@@ -128,23 +146,25 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={userUpdate} >
+        <form className="grid items-start gap-6" onSubmit={userUpdate} aria-disabled={!edit}>
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
                     <div className="text-center">
                         <FormAvatar name="头像" column="AvatarURL" holder={item.Name} value={item.AvatarURL} />
                         <FormText name="ID" column="ID" value={item.ID} />
                     </div>
-                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
-                    <FormInput name={tableKeys.RealName.name} column="RealName" value={item.RealName} />
-                    <FormInput name={tableKeys.Phone.name} column="Phone" value={item.Phone} />
+                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} block={true}/>
+                    <FormInput name={tableKeys.RealName.name} column="RealName" value={item.RealName} block={true} />
+                    <FormInput name={tableKeys.Phone.name} column="Phone" value={item.Phone} block={true}/>
                     <FormInput name={tableKeys.Email.name} column="Email" value={item.Email} />
-                    <FormInput name="登录密码" column="LoginPassword" value="" />
-                    <FormInput name="交易密码" column="RransactionPassword" value="" />
+                    <FormInput name={tableKeys.LoginPassword.name} column="LoginPassword" value="" />
+                    <FormInput name={tableKeys.TransactionPassword.name} column="TransactionPassword" value="" />
+                    <FormSelect name="默认地址" column="AddressID" value={item.AddressID} options={item.Addresses.map((address) => ({ ID: address.ID, Name: `${address.Name} - ${address.Phone} - ${address.Province} ${address.City} ${address.District} ${address.Detail}` }))} />
+                    <FormSelect name="默认银行" column="BankID" value={item.BankID} options={item.Banks.map((bank) => ({ ID: bank.ID, Name: `${bank.Name} -  ${bank.Bank} ${bank.Branch} - ${bank.Account}` }))} />
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" />
                     <FormInput name={tableKeys.Money.name} column="Money" value={item.Money} type="number" />
                     <FormInput name={tableKeys.Withdrawal.name} column="Withdrawal" value={item.Withdrawal} type="number" />
-                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
+                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={StatusTags} />
                 </div>
             </ScrollArea>
             <Button type="submit">保存更新</Button>

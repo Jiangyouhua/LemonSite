@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -16,7 +16,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Pen, Plus } from "lucide-react"
 import {
     Pagination,
     PaginationContent,
@@ -34,8 +33,9 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import MoreMenu from "./more-menu"
 
-export default function AdminTable({ total, items, dict, loadData, showDetail, addItem }) {
+export default function AdminTable({ total, items, dict, loadData, addItem, actions}) {
     const [key, setKey] = useState("")
     const [value, setValue] = useState("")
     const [loaded, setLoaded] = useState(false)
@@ -103,20 +103,21 @@ export default function AdminTable({ total, items, dict, loadData, showDetail, a
             <div className="flex items-center py-4">
                 {!addItem ? <></> : <Button onClick={addItem} size="icon" variant="outline" className="mr-4"><Plus /></Button>}
                 <SeachSelecter columns={columns} dict={dict} keyUpdate={setKey} /> &nbsp;&nbsp;
-                <Input placeholder="请输入查看的内容..." value={value} onUpdate={(e) => { setValue(e.target.value) }} className="max-w-sm" />
-                 &nbsp;&nbsp;<Button onClick={search}>搜索</Button>
+                <Input placeholder="请输入查看的内容..." value={value} onChange={(e) => { setValue(e.target.value) }} className="max-w-sm" />
+                &nbsp;&nbsp;<Button onClick={search}>搜索</Button>
+                <div className="flex w-full"></div>
+                <ColumnSelecter columns={columns} selectUpdate={selectUpdate} />
             </div>
             <div className="overflow-hidden rounded-md border">
                 <Table>
                     <HeadTabler columns={columns} dict={dict} />
-                    <BodyTabler rows={items} columns={columns} dict={dict} showDetail={showDetail} />
+                    <BodyTabler rows={items} columns={columns} dict={dict} actions={actions} />
                 </Table>
             </div>
             <div className="flex items-center py-4">
                 <LimitSelecter limit={limit} limitUpdate={limitUpdate} />
-                <ColumnSelecter columns={columns} selectUpdate={selectUpdate} />
                 <div className="flex w-full"></div>
-                <PaginationTabler current={page} pages={pageTags} pageTotal={pageTotal} pageUpdate={pageUpdate} />
+                <PaginationTabler className="max-w-sm"  current={page} pages={pageTags} pageTotal={pageTotal} pageUpdate={pageUpdate} />
             </div>
         </div >
     )
@@ -124,7 +125,7 @@ export default function AdminTable({ total, items, dict, loadData, showDetail, a
 
 export function SeachSelecter({ columns, dict, keyUpdate }) {
     return (
-        <Select onValueUpdate={(_value) => { keyUpdate(_value) }}>
+        <Select onValueChange={(_value) => { keyUpdate(_value) }}>
             <SelectTrigger id="rows-per-page" className="w-40" >
                 <SelectValue placeholder="请选择" />
             </SelectTrigger>
@@ -149,31 +150,29 @@ export function HeadTabler({ columns, dict }) {
                         {dict[column.name]?.name ?? column.name}
                     </TableHead>
                 ))}
-                <TableHead key='head_edit' className="text-center">编辑</TableHead>
+                <TableHead key='head_edit' className="text-center">更多</TableHead>
             </TableRow>
         </TableHeader>
     )
 }
 
-export function BodyTabler({ rows, columns, dict, showDetail }) {
+export function BodyTabler({ rows, columns, dict, actions }) {
     return (
         <TableBody>
             {rows.map((row, index) => (
                 <TableRow key={"row_" + index}>
                     <TableCell key={"row_index_" + index} className="text-center"> {index} </TableCell>
                     {columns.map((column) => (
-                        <TableCell key={'row_' + column.name + "_" + index} className={(column.checked ? 'visible' : 'hidden') + " max-w-24 overflow-ellipsis overflow-hidden whitespace-nowrap" }>
+                        <TableCell key={'row_' + column.name + "_" + index} className={(column.checked ? 'visible' : 'hidden') + " max-w-24 overflow-ellipsis overflow-hidden whitespace-nowrap"}>
                             {dict[column.name].cell ? dict[column.name].cell(row[column.name]) : row[column.name]}
                         </TableCell>
                     ))}
                     <TableCell key={"row_edit_" + index} className="items-center content-center text-center">
-                        <Button variant="outline" onClick={() => { showDetail(row) }}>
-                            <Pen />
-                        </Button>
+                        <MoreMenu item={row} actions={actions} />
                     </TableCell>
                 </TableRow>
             ))}
-        </TableBody>
+        </TableBody>    
     )
 }
 
@@ -183,7 +182,7 @@ export function LimitSelecter({ limit, limitUpdate }) {
             <Label htmlFor="rows-per-page" className="text-sm font-medium">
                 每页行数
             </Label>
-            <Select value={limit + ''} onValueUpdate={(_value) => { limitUpdate(_value) }}>
+            <Select value={limit + ''} onValueChange={(_value) => { limitUpdate(_value) }}>
                 <SelectTrigger id="rows-per-page" className="w-20" >
                     <SelectValue placeholder="10" />
                 </SelectTrigger>
@@ -211,7 +210,7 @@ export function ColumnSelecter({ columns, selectUpdate }) {
                 {columns.map((item) => {
                     return (
                         <DropdownMenuCheckboxItem key={"column_" + item.name} className="capitalize"
-                            checked={item.checked} onCheckedUpdate={() => selectUpdate(item.name)}
+                            checked={item.checked} onCheckedChange={() => selectUpdate(item.name)}
                         >
                             {item.name}
                         </DropdownMenuCheckboxItem>

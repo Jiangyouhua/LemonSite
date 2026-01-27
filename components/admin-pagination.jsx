@@ -69,7 +69,7 @@ function LimitSelecter({ limit, limitUpdate }) {
             <Label htmlFor="rows-per-page" className="text-sm font-medium">
                 每页行数
             </Label>
-            <Select value={limit + ''} onValueUpdate={(_value) => { limitUpdate(_value) }}>
+            <Select value={limit + ''} onValueChange={(_value) => { limitUpdate(_value) }}>
                 <SelectTrigger id="rows-per-page" className="w-20" >
                     <SelectValue placeholder="10" />
                 </SelectTrigger>

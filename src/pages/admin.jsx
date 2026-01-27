@@ -3,13 +3,13 @@ import { Outlet } from "react-router-dom";
 import AdminHeader from "@/components/admin-header";
 import AdminSider from "@/components/admin-sider";
 
-export default function Admin() {
+export default function Admin({navs}) {
     return (
         <>
             <SidebarProvider>
                 <AdminSider />
                 <SidebarInset>
-                    <AdminHeader />
+                    <AdminHeader navs={navs} />
                     <main>
                         <Outlet />
                     </main>
