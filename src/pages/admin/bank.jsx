@@ -13,9 +13,7 @@ import {
     DialogTrigger,
     DialogDescription,
 } from "@/components/ui/dialog"
-
 import AdminTable from "@/components/admin-table"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
@@ -94,7 +92,7 @@ export default function BankPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !bank || bank.ID === 0 ? "新添内容" : "编辑内容，ID：" + bank.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={bank} saved={finishSave} /> 
@@ -106,7 +104,7 @@ export default function BankPage() {
 
 export function ProfileForm({ item, saved, edit }) {
     const bankUpdate = function (event) {
-        API.bankUpdate.post(event).then((result) => {
+        API.bankUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -121,9 +119,7 @@ export function ProfileForm({ item, saved, edit }) {
         <form className="grid items-start gap-6" onSubmit={bankUpdate} aria-disabled={!edit}>
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormText name="ID" column="ID" value={item.ID} />
-                    </div>
+                    <input type="hidden" name="ID" value={item.id} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name}  />
                     <FormInput name={tableKeys.Bank.name} column="Bank" value={item.Bank}  />
                     <FormInput name={tableKeys.Branch.name} column="Branch" value={item.Branch}  />

@@ -63,14 +63,14 @@ export default function AdminUser() {
                         sideOffset={4}
                     >
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
+                            {/* <DropdownMenuItem>
                                 <BadgeCheck />
                                 用户账号
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <Bell />
                                 用户信息
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={logoutHandel}>

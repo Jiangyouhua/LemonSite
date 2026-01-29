@@ -13,12 +13,10 @@ import {
     DialogTrigger,
     DialogDescription,
 } from "@/components/ui/dialog"
-
 import AdminTable from "@/components/admin-table"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
-import FormAvatar from "@/components/Form-avatar"
+import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
 
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => {return {ID:index, Name: item}})
@@ -94,7 +92,7 @@ export default function CategoryPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !category || category.ID === 0 ? "新添内容" : "编辑内容，ID：" + category.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={category} saved={finishSave} />
@@ -106,7 +104,7 @@ export default function CategoryPage() {
 
 export function ProfileForm({ item, saved }) {
     const categoryUpdate = function (event) {
-        API.categoryUpdate.post(event).then((result) => {
+        API.categoryUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -121,13 +119,11 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={categoryUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormAvatar name={item.Name} column="IconURL" value={item.IconURL} />
-                        <FormText name="ID" column="ID" value={item.ID} />
-                    </div>
+                    <input type="hidden" name="ID" value={item.id} />
+                    <FormImage name={tableKeys.IconURL.name} column="IconURL" value={item.IconURL} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
-                    <FormAvatar name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} isImage={true} />
+                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} isImage={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

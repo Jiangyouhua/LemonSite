@@ -13,9 +13,7 @@ import {
     DialogTrigger,
     DialogDescription,
 } from "@/components/ui/dialog"
-
 import AdminTable from "@/components/admin-table"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
@@ -82,7 +80,7 @@ export default function MoneyPage({kind, name, url}) {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !money || money.ID === 0 ? "新添内容" : "编辑内容，ID：" + money.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={money} saved={finishSave} />
@@ -94,7 +92,7 @@ export default function MoneyPage({kind, name, url}) {
 
 export function ProfileForm({ item, saved }) {
     const moneyUpdate = function (event) {
-        API.moneyUpdate.post(event).then((result) => {
+        API.moneyUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -109,9 +107,7 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={moneyUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormText name="ID" column="ID" value={item.ID} />
-                    </div>
+                    <input type="hidden" name="ID" value={item.id} />
                     <FormInput name={tableKeys.Amonut.name} column="Amonut" value={item.Amonut} block={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>

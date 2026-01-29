@@ -14,14 +14,11 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog"
 import AdminTable from "@/components/admin-table"
-import FormAvatar from "@/components/Form-avatar"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import CellAvatar from "@/components/cell-avatar"
 import FormTags from "@/components/form-tags"
-import { Play } from "lucide-react"
-import { Form } from "react-router-dom"
+import FormImage from "@/components/form-image"
 
 const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => {return {ID:index, Name: item}})
 
@@ -31,7 +28,7 @@ const tableKeys = {
     Author: Seer("", "作者", true),
     Publisher: Seer("", "出版社", true),
     ISBN: Seer("", "ISBN", true),
-    ImageURL: Seer("", "产品图片", true, (v) => <CellAvatar url={v} />),
+    ImageURL: Seer([], "产品图片", true, (v) => <CellAvatar url={v} />),
     ReleaseDate: Seer("", "发布日期", true),
     Slogan: Seer("", "广告语", true),
     Description: Seer("", "说明", true),
@@ -114,7 +111,7 @@ export default function DramaPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !drama || drama.ID === 0 ? "新添内容" : "编辑内容，ID：" + drama.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={drama} saved={finishSave} />
@@ -128,7 +125,7 @@ export function ProfileForm({ item, saved }) {
     const [load, setLoad] = useState(false)
 
     const dramaUpdate = function (event) {
-        API.dramaUpdate.post(event).then((result) => {
+        API.dramaUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -161,10 +158,8 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={dramaUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormAvatar name={item.Name} column="ImageURL" value={item.ImageURL} />
-                        <FormText name="ID" column="ID" value={item.ID} />
-                    </div>
+                    <input type="hidden" name="ID" value={item.id} />
+                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Author.name} column="Author" value={item.Author} />
                     <FormInput name={tableKeys.Publisher.name} column="Publisher" value={item.Publisher} />

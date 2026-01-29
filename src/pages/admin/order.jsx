@@ -13,9 +13,7 @@ import {
     DialogTrigger,
     DialogDescription,
 } from "@/components/ui/dialog"
-
 import AdminTable from "@/components/admin-table"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
@@ -87,7 +85,7 @@ export default function OrderPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !order || order.ID === 0 ? "新添内容" : "编辑内容，ID：" + order.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={order} saved={finishSave} />
@@ -99,7 +97,7 @@ export default function OrderPage() {
 
 export function ProfileForm({ item, saved }) {
     const orderUpdate = function (event) {
-        API.orderUpdate.post(event).then((result) => {
+        API.orderUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -114,9 +112,7 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={orderUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormText name="ID" column="ID" value={item.ID} />
-                    </div>
+                    <input type="hidden" name="ID" value={item.id} />
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} block={true}/>
                     <FormInput name={tableKeys.Quantity.name} column="Quantity" value={item.Quantity} type="number" block={true} />
                     <FormInput name={tableKeys.Amount.name} column="Amount" value={item.Amount} type="number" block={true}/>

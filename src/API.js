@@ -1,3 +1,4 @@
+import axios from 'axios';
 const baseUrl = '/api/v1'
 
 export const urlParams = new URLSearchParams(window.location.search);
@@ -42,25 +43,24 @@ export const API = {
     userUpdate: `${baseUrl}/user/update`,
 };
 
-String.prototype.request = function (method, data) {
+const headers = { 'Content-Type': 'application/json', 'Authorization': `Bear ${localStorage.getItem("token")}` }
+
+String.prototype.request = function (method, data, params) {
     return new Promise((resolve, reject) => {
-        fetch(this, {
-            method: method,
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bear ${localStorage.getItem("token")}` },
-        }).then((response) => {
-            if (response.ok) {
-                resolve(response.json())
-            } else {
-                reject(response.text())
-            }
-        }).catch((error) => {
-            reject(error)
-        })
+        axios.request({ method: method, url: this, data: data, params: params, headers: headers })
+            .then((response) => {
+                if (response.status === 200) {
+                    resolve(response.data)
+                } else {
+                    reject(response.statusText)
+                }
+            }).catch((error) => {
+                reject(error)
+            })
     })
 }
 
-String.prototype.post = function (event) {
+String.prototype.submit = function (event) {
     event.preventDefault()
     const formData = new FormData(event.target)
     let data = {};
@@ -77,32 +77,34 @@ String.prototype.post = function (event) {
     inputs.forEach(element => {
         data[element.getAttribute("name")] = +element.value
     })
+    this.post(data)
+}
 
-    if (Object.keys(data).join() === "ID") {
-        return new Promise((resolve, reject) => {
-            reject("数据为空")
-        })
-    }
-    return this.request("POST", data)
+String.prototype.post = function (data) {
+    this.request("post", data)
 }
 
 String.prototype.get = function (data) {
-    return (this + "?" + new URLSearchParams(data)).request("GET")
+    this.request("get", null, data)
 }
 
-String.prototype.put = function (file) {
+String.prototype.put = function (file, progress) {
     return new Promise((resolve, reject) => {
-        fetch(this, {
-            method: "PUT",
-            body: file,
-        }).then((response) => {
-            if (response.ok) {
-                resolve({ Succeed: true, Code: 0, Message: "Upload successful", Data: null })
-            } else {
-                reject({ Succeed: false, Code: response.status, Message: response.statusText, Data: null })
+        axios.put(this, file, {
+            onUploadProgress: (event) => {
+                if (event.lengthComputable) {
+                    progress(Math.round((event.loaded / event.total) * 100))
+                }
             }
-        }).catch((error) => {
-            reject(error)
         })
+            .then((response) => {
+                if (response.status === 200) {
+                    resolve({ Succeed: true, Code: 0, Message: "Upload successful", Data: null })
+                } else {
+                    reject(response.statusText)
+                }
+            }).catch((error) => {
+                reject(error)
+            })
     })
 }

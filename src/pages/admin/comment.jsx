@@ -13,9 +13,7 @@ import {
     DialogTrigger,
     DialogDescription,
 } from "@/components/ui/dialog"
-
 import AdminTable from "@/components/admin-table"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
@@ -83,7 +81,7 @@ export default function CommentPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !comment || comment.ID === 0 ? "新添内容" : "编辑内容，ID：" + comment.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={comment} saved={finishSave} />
@@ -95,7 +93,7 @@ export default function CommentPage() {
 
 export function ProfileForm({ item, saved }) {
     const commentUpdate = function (event) {
-        API.commentUpdate.post(event).then((result) => {
+        API.commentUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -110,9 +108,7 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={commentUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormText name="ID" column="ID" value={item.ID} />
-                    </div>
+                    <input type="hidden" name="ID" value={item.id} />
                     <FormInput name={tableKeys.Content.name} column="Content" value={item.Content} />
                     <FormInput name={tableKeys.ReplyTo.name} column="ReplyTo" value={item.ReplyTo} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />

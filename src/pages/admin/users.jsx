@@ -13,9 +13,7 @@ import {
     DialogTrigger,
     DialogDescription,
 } from "@/components/ui/dialog"
-
 import AdminTable from "@/components/admin-table"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import FormAvatar from "@/components/Form-avatar"
@@ -95,7 +93,7 @@ export default function UsersPage() {
     }
 
     const addItem = () => {
-        let _user = {}
+        let _user = {Addresses:[], Banks: []}
         Object.entries(tableKeys).forEach(([k, v]) => {
             _user[k] = v.value
         })
@@ -118,7 +116,7 @@ export default function UsersPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !user || user.ID === 0 ? "新添内容" : "编辑内容，ID：" + user.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={user} saved={finishSave} /> 
@@ -131,7 +129,7 @@ export default function UsersPage() {
 export function ProfileForm({ item, saved, edit }) {
     const [user, setUser] = useLocalStorage("user")
     const userUpdate = function (event) {
-        API.userUpdate.post(event).then((result) => {
+        API.userUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 if (result.Data.ID === user.ID) {
                     setUser(result.Data)
@@ -151,8 +149,8 @@ export function ProfileForm({ item, saved, edit }) {
                 <div className="px-[4px] ">
                     <div className="text-center">
                         <FormAvatar name="头像" column="AvatarURL" holder={item.Name} value={item.AvatarURL} />
-                        <FormText name="ID" column="ID" value={item.ID} />
                     </div>
+                    <input type="hidden" name="ID" value={item.id} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} block={true}/>
                     <FormInput name={tableKeys.RealName.name} column="RealName" value={item.RealName} block={true} />
                     <FormInput name={tableKeys.Phone.name} column="Phone" value={item.Phone} block={true}/>

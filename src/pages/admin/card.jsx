@@ -13,9 +13,7 @@ import {
     DialogTrigger,
     DialogDescription,
 } from "@/components/ui/dialog"
-
 import AdminTable from "@/components/admin-table"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
@@ -99,7 +97,7 @@ export default function CardPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !card || card.ID === 0 ? "新添内容" : "编辑内容，ID：" + card.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={card} saved={finishSave} />
@@ -113,7 +111,7 @@ export function ProfileForm({ item, saved }) {
     const [loaded, setLoaded] = useState(false)
     const [categories, setCategories] = useState([])
     const cardUpdate = function (event) {
-        API.cardUpdate.post(event).then((result) => {
+        API.cardUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -141,9 +139,7 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={cardUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormText name="ID" column="ID" value={item.ID} />
-                    </div>
+                     <input type="hidden" name="ID" value={item.id} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
                     <FormSelect name={tableKeys.Category.name} column="CategoryID" value={item.CategoryID} options={categories} />

@@ -11,7 +11,7 @@ export default function LoginPage() {
     const [, setAuth] = useLocalStorage("auth")
 
     const handleSubmit = (event) => {
-        API.login.post(event).then( (result) =>{
+        API.login.submit(event).then( (result) =>{
             if (result.Succeed) {
                 const data = result.Data
                 setUser(data);
@@ -22,7 +22,8 @@ export default function LoginPage() {
             } else {
                 toast.error("邮箱或密码错误")
             }
-        }).catch( (error) => {
+        })
+        .catch( (error) => {
             console.error(error)
         })
     }

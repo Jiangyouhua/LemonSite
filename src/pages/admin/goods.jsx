@@ -14,27 +14,30 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog"
 import AdminTable from "@/components/admin-table"
-import FormAvatar from "@/components/Form-avatar"
-import FormText from "@/components/form-text"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import CellAvatar from "@/components/cell-avatar"
 import FormTags from "@/components/form-tags"
+import FormImage from "@/components/form-image"
 
 const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => {return {ID:index, Name: item}})
+const kindTags = ['未设置', '积分', '价格'].map((item, index) => {return {ID:index, Name: item}})
 
 const tableKeys = {
     ID: Seer(0, "ID", true),
-    ImageURL: Seer("", "产品图片", true, (v) => <CellAvatar url={v} />),
+    ImageURL: Seer([], "产品图片", true, (v) => <CellAvatar url={v} />),
     Name: Seer("", "名称", true),
     Slogan: Seer("", "广告语", true),
     Description: Seer("", "说明", true),
     Promotional: Seer("", "促销语", true),
     Tags: Seer("", "分类标签", true),
-    Price: Seer(0, "价格", true,  (v) => v.toFixed(2)),
+    Kind: Seer("", "类型", true, (v) => kindTags[v].Name),
+    Score: Seer(0, "积分", true),
+    ScoreExplanation: Seer("", "积分说明", true),
+    Price: Seer(0, "价格", true),
     PriceExplanation: Seer("", "价格说明", true),
     Inventory: Seer("", "库存", true),
-    IntroduceURL: Seer("", "推广图片", true, (v) => <CellAvatar url={v} /> ),
+    IntroduceURL: Seer([], "推广图片", true, (v) => <CellAvatar url={v} /> ),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -101,7 +104,7 @@ export default function GoodsPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>编辑内容</DialogTitle>
+                        <DialogTitle>{ !goods || goods.ID === 0 ? "新添内容" : "编辑内容，ID：" + goods.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={goods} saved={finishSave} />
@@ -115,7 +118,7 @@ export function ProfileForm({ item, saved }) {
     const [load, setLoad] = useState(false)
 
     const goodsUpdate = function (event) {
-        API.goodsUpdate.post(event).then((result) => {
+        API.goodsUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -162,19 +165,20 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={goodsUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormAvatar name={item.Name} column="ImageURL" value={item.ImageURL} />
-                        <FormText name="ID" column="ID" value={item.ID} />
-                    </div>
+                    <input type="hidden" name="ID" value={item.id} />
+                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Slogan.name} column="Slogan" value={item.Slogan} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
                     <FormTags name={tableKeys.Tags.name} column="Tags" value={item.Tags} optionWords={goodsTags} />
                     <FormTags name={tableKeys.Promotional.name} column="Promotional" value={item.Promotional} optionWords={goodsPromotional} />
+                    <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
+                    <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" />
+                    <FormInput name={tableKeys.ScoreExplanation.name} column="ScoreExplanation" value={item.ScoreExplanation} />
                     <FormInput name={tableKeys.Price.name} column="Price" value={item.Price} type="number" />
                     <FormInput name={tableKeys.PriceExplanation.name} column="PriceExplanation" value={item.PriceExplanation} />
                     <FormInput name={tableKeys.Inventory.name} column="Inventory" value={item.Inventory} type="number" />
-                    <FormAvatar name={tableKeys.IntroduceURL.name} column="IntroduceURL" value={item.IntroduceURL} isImage={true} />
+                    <FormImage name={tableKeys.IntroduceURL.name} column="IntroduceURL" value={item.IntroduceURL} isImage={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
