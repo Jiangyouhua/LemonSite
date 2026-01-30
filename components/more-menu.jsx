@@ -11,7 +11,7 @@ import { MoreHorizontal } from "lucide-react"
 export default function MoreMenu({item, actions}) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger >
         <Button variant="outline"><MoreHorizontal className="h-4 w-4" /></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

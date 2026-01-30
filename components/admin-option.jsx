@@ -14,7 +14,7 @@ export function AdminOption() {
             <SidebarMenu>
                 {AdminOptions.map((item) => (
                     <SidebarMenuItem key={item.name}>
-                        <SidebarMenuButton asChild>
+                        <SidebarMenuButton >
                             <a href={item.url}>
                                 <item.icon />
                                 <span>{item.name}</span>

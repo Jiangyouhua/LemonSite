@@ -1,17 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { useEffect } from "react";
+import { Trash2, CircleCheck } from "lucide-react";
 
 export function FileItem({
   file,
   progress,
   onRemove,
+  disabled,
 }) {
-  const imageUrl = URL.createObjectURL(file);
-
-  useEffect(() => {
-    return () => URL.revokeObjectURL(imageUrl);
-  }, [imageUrl]);
+  const imageUrl = !file.localFile ? null : URL.createObjectURL(file.localFile)
 
   return (
     <div
@@ -19,9 +15,9 @@ export function FileItem({
       key={file.name}
     >
       <div className="flex items-center gap-2">
-        <div className="w-18 h-14 bg-muted rounded-sm flex items-center justify-center self-start row-span-2 overflow-hidden">
+        <div className="w-18 h-14 bg-muted rounded border-gray-100 border flex items-center justify-center self-start row-span-2 overflow-hidden">
           <img
-            src={imageUrl}
+            src={imageUrl ?? file.requestURL}
             alt={file.name}
             className="w-full h-full object-cover"
           />
@@ -31,13 +27,14 @@ export function FileItem({
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <span className="text-sm text-foreground truncate max-w-[250px]">
-                {file.name}
+                {file.requestURL ?? file.localFile.name}
               </span>
               <span className="text-sm text-muted-foreground whitespace-nowrap">
-                {Math.round(file.size / 1024)} KB
+                { !file.status && !file.requestURL ? ( Math.round(file.localFile.size / 1024) + "KB") : <CircleCheck color="#01ac1e"  />} 
               </span>
             </div>
             <Button
+              disabled={disabled}
               variant="ghost"
               size="sm"
               className="h-8 w-8 bg-transparent! hover:text-red-500"
@@ -50,7 +47,7 @@ export function FileItem({
           <div className="flex items-center gap-2">
             <div className="h-2 bg-muted rounded-full overflow-hidden flex-1">
               <div
-                className="h-full bg-primary"
+                className="h-full bg-green-500"
                 style={{
                   width: `${progress || 0}%`,
                 }}

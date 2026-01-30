@@ -3,7 +3,6 @@ const baseUrl = '/api/v1'
 
 export const urlParams = new URLSearchParams(window.location.search);
 export const API = {
-    sendCode: `${baseUrl}/user/send/code`,
     login: `${baseUrl}/user/email/password`,
     addressAll: `${baseUrl}/address/all`,
     addressUser: `${baseUrl}/address/user/${urlParams.get("user_id")}`,
@@ -47,18 +46,18 @@ export const API = {
 const getToken = () => localStorage.getItem("token") || '';
 
 String.prototype.request = function (method, data = undefined) {
-    return axios({
-        method,
-        url: this.toString(),
-        data,
-        headers: {
-            'Authorization': `Bearer ${getToken()}`,
-            'Content-Type': 'application/json',
-        },
-        timeout: 15000,
-    })
-        .then(res => res.data)
-        .catch(err => { throw err })
+  return axios({
+    method,
+    url: this.toString(),
+    data,
+    headers: {
+      'Authorization': `Bearer ${getToken()}`,
+      'Content-Type': 'application/json', 
+    },
+    timeout: 15000,         
+  })
+    .then(res => res.data)
+    .catch(err => { throw err })
 };
 
 String.prototype.submit = function (event) {
@@ -68,7 +67,7 @@ String.prototype.submit = function (event) {
     formData.forEach((value, key) => {
         let arr = key.split(".")
         if (arr.length == 1) {
-            data[key] = key == "ID" ? +value : value
+            data[key] = value
             return
         }
         data[arr[0]] = [...(data[arr[0]] ?? []), value]
@@ -78,11 +77,11 @@ String.prototype.submit = function (event) {
     inputs.forEach(element => {
         data[element.getAttribute("name")] = +element.value
     })
-    return this.post(data)
+    this.post(data)
 }
 
 String.prototype.post = function (data) {
-    return this.request("POST", data)
+    this.request("POST", data)
 }
 
 String.prototype.get = function (data) {
@@ -90,21 +89,23 @@ String.prototype.get = function (data) {
 }
 
 String.prototype.put = function (file, progress) {
-    return axios.put(this, file, {
-        onUploadProgress: (event) => {
-            if (event.lengthComputable) {
-                progress(Math.round((event.loaded / event.total) * 100))
-            }
-        }
-    })
-        .then(res => {
-            return {
-                Succeed: res.status === 200,
-                Code: 0,
-                Message: "Upload " + (res.status === 200 ? "successful" : "failed"),
-                Data: res.statusText
+    return new Promise((resolve, reject) => {
+        axios.put(this, file, {
+            onUploadProgress: (event) => {
+                if (event.lengthComputable) {
+                    progress(Math.round((event.loaded / event.total) * 100))
+                }
             }
         })
-        .catch(err => { throw err })
+            .then((response) => {
+                if (response.status === 200) {
+                    resolve({ Succeed: true, Code: 0, Message: "Upload successful", Data: null })
+                } else {
+                    reject(response.statusText)
+                }
+            }).catch((error) => {
+                reject(error)
+            })
+    })
 }
 

@@ -18,34 +18,34 @@ import { Pen, Lock, Shield, CheckIcon, PlusIcon } from "lucide-react"
 export default function FormTags({ name, column, value, optionWords, block }) {
     const [disabled, setDisabled] = useState(true)
     const [items, setItems] = useState(value)
-    const selectedWords = function(_words) {
+    const selectedWords = (_words) => {
         setItems(_words)
     }
 
     return (
         <div className="grid gap-0 py-2">
             <Label>
-                <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
-                    {disabled ? ( !block ? <Lock /> : <Shield />) : <Pen />}
+                <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
+                    {disabled ? (!block ? <Lock /> : <Shield />) : <Pen />}
                 </Button>
                 {name}:
             </Label>
-            { !items ? <></> : items.map((item, index) =>{
-                return (<Input type='hidden' id={column} name={`${column}.${index}`} disabled={disabled} defaultValue={item} />)
+            {!items ? <></> : items.map((item, index) => {
+                return (<Input key={column + "_tag_" + index} type='hidden' id={column} name={`${column}.${index}`} disabled={disabled} defaultValue={item} />)
             })}
-            
-            <TagSelect id={column}  disabled={disabled} optionWords={optionWords}  selectedWords={selectedWords} />
+
+            <TagSelect id={column} disabled={disabled} optionWords={optionWords} selectedWords={selectedWords} />
         </div>
     )
 }
 
 const TagSelect = ({ disabled, optionWords, selectedWords }) => {
-    const  [load, setLoad] = useState(false)
+    const [load, setLoad] = useState(false)
     const [selected, setSelected] = useState([]);
     const [newTag, setNewTag] = useState('');
     const [tags, setTags] = useState([]);
 
-    const removeTag = function (_value) {
+    const removeTag = (_value) => {
         if (!selected.includes(_value)) {
             return;
         }
@@ -54,19 +54,20 @@ const TagSelect = ({ disabled, optionWords, selectedWords }) => {
         selectedWords(_words)
     };
 
-    const handleSelect = function (_value) {
+    const handleSelect = (_value) => {
         if (selected.includes(_value)) {
             removeTag(_value);
             return;
         }
-        let _words  = [...selected, _value]
+        let _words = [...selected, _value]
         setSelected(_words);
         selectedWords(_words)
+        setNewTag('');
     };
 
-    const handleCreateTag = function () {
+    const handleCreateTag = () => {
         setTags((prev) => [...prev, newTag]);
-        let _words  = [...selected, newTag]
+        let _words = [...selected, newTag]
         setSelected(_words);
         selectedWords(_words)
         setNewTag('');
@@ -74,7 +75,7 @@ const TagSelect = ({ disabled, optionWords, selectedWords }) => {
 
     if (!load) {
         setLoad(true)
-        optionWords(function(words){
+        optionWords(function (words) {
             setTags(words)
         })
     }

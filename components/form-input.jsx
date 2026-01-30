@@ -10,7 +10,7 @@ export default function FormInput({ name, column, value, block }) {
     return (
         <div className="grid gap-0 py-2">
             <Label>
-                <Button variant="ghost" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!block ? !disabled : true)}}  >
+                <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); setDisabled(!block ? !disabled : true)}}  >
                     {disabled ? ( !block ? <Lock /> : <Shield />) : <Pen />}
                 </Button>
                 {name}:

@@ -29,26 +29,24 @@ const tableKeys = {
 }
 
 export default function BankPage() {
+    const [loaded, setLoaded] = useState(false)
     const [open, setOpen] = useState(false)
     const [bank, setBank] = useState()
-    const [data, setData] = useState({ Total: 0, Items: [] })
-    const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
     const [, setNavs] = useLocalStorage("navs", [])
 
     useEffect(() => {
         setNavs([
             { name: "用户管理", url: "/admin" },
             { name: "用户明细", url: "/admin/user" },
-            { name:`${urlParams.get("user_name")}的银行账号`, url: location },
+            { name: `${urlParams.get("user_name")}的银行账号`, url: location },
         ])
     }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
         API.bankUser.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+            setLoaded(true)
             if (result.Succeed) {
-                setPagination({offset:offset, limit: limit, key: key, value:value})
-                setData(result.Data)
-                back(result.Data.Total)
+                back(result.Data)
             } else {
                 toast.error("数据加载失败，请稍后再试")
             }
@@ -57,10 +55,9 @@ export default function BankPage() {
         })
     }
 
-    const finishSave = function () {
-        loadData(pagination.offset, pagination.limit, pagination.key, pagination.value, function () {
-            setOpen(false)
-        })
+    const finishSave = () => {
+        setLoaded(false)
+        setOpen(false)
     }
 
     const editDetail = (_bank) => {
@@ -69,33 +66,32 @@ export default function BankPage() {
     }
 
     const addItem = () => {
-            let _bank = {UserID: urlParams.get("user_id")}
-            Object.entries(tableKeys).forEach(([k, v]) => {
-                _bank[k] = v.value
-            })
-            setBank(_bank)
-            setOpen(true)
-        }
+        let _bank = { UserID: urlParams.get("user_id") }
+        Object.entries(tableKeys).forEach(([k, v]) => {
+            _bank[k] = v.value
+        })
+        setBank(_bank)
+        setOpen(true)
+    }
 
     return (
         <div className="mx-4 w-auto">
+            <AdminTable
+                loaded={loaded}
+                dict={tableKeys}
+                loadData={loadData}
+                actions={[{ name: "编辑内容", func: editDetail }]}
+                addItem={addItem}
+            />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <AdminTable
-                        total={data.Total}
-                        items={data.Items}
-                        dict={tableKeys}
-                        loadData={loadData}
-                        actions={[{name: "编辑内容", func: editDetail}]}
-                        addItem={addItem}
-                    />
+                <DialogTrigger >
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{ !bank || bank.ID === 0 ? "新添内容" : "编辑内容，ID：" + bank.ID}</DialogTitle>
+                        <DialogTitle>{!bank || bank.ID === 0 ? "新添内容" : "编辑内容，ID：" + bank.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={bank} saved={finishSave} /> 
+                    <ProfileForm item={bank} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
@@ -103,7 +99,7 @@ export default function BankPage() {
 }
 
 export function ProfileForm({ item, saved, edit }) {
-    const bankUpdate = function (event) {
+    const bankUpdate = (event) => {
         API.bankUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
@@ -119,12 +115,12 @@ export function ProfileForm({ item, saved, edit }) {
         <form className="grid items-start gap-6" onSubmit={bankUpdate} aria-disabled={!edit}>
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <input type="hidden" name="ID" value={item.id} />
-                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name}  />
-                    <FormInput name={tableKeys.Bank.name} column="Bank" value={item.Bank}  />
-                    <FormInput name={tableKeys.Branch.name} column="Branch" value={item.Branch}  />
-                    <FormInput name={tableKeys.Account.name} column="Account" value={item.Account}  />
-                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags}  />
+                    <input type="hidden" name="ID" value={item.ID} />
+                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
+                    <FormInput name={tableKeys.Bank.name} column="Bank" value={item.Bank} />
+                    <FormInput name={tableKeys.Branch.name} column="Branch" value={item.Branch} />
+                    <FormInput name={tableKeys.Account.name} column="Account" value={item.Account} />
+                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
             <Button type="submit">保存更新</Button>

@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 export default function SiteLogo() {
     return (
-        <Button variant="ghost" asChild size="lg" className="flex items-center gap-2 p-0 hover:bg-transparent focus:ring-0 h-auto">
+        <Button variant="ghost"  size="lg" className="flex items-center gap-2 p-0 hover:bg-transparent focus:ring-0 h-auto">
             <Link to="/">
                 <img src="/images/favicon.svg" alt="Lemon Site Logo" className="size-12"/>
                 <span className="text-left">

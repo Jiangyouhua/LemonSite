@@ -19,21 +19,20 @@ import FormSelect from "@/components/form-select"
 import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
 
-const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => {return {ID:index, Name: item}})
+const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
 const tableKeys = {
     ID: Seer(0, "ID", true),
     Name: Seer("", "名称", true),
-    Description:Seer("", "说明", true),
+    Description: Seer("", "说明", true),
     ImageURL: Seer("", "页面图", true, (v) => <CellAvatar url={v} />),
     IconURL: Seer("", "类型ICON", true, (v) => <CellAvatar url={v} />),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
 export default function CategoryPage() {
+    const [loaded, setLoaded] = useState(false)
     const [open, setOpen] = useState(false)
     const [category, setCategory] = useState()
-    const [data, setData] = useState({ Total: 0, Items: [] })
-    const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
     const [, setNavs] = useLocalStorage("navs", [])
 
     useEffect(() => {
@@ -41,14 +40,13 @@ export default function CategoryPage() {
             { name: "打卡管理", url: "/admin" },
             { name: "打卡类型", url: "/admin/category" },
         ])
-    }, [setNavs]) 
+    }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
         API.categoryAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+            setLoaded(true)
             if (result.Succeed) {
-                setPagination({offset:offset, limit: limit, key: key, value:value})
-                setData(result.Data)
-                back(result.Data.Total)
+                back(result.Data)
             } else {
                 toast.error("数据加载失败，请稍后再试")
             }
@@ -57,10 +55,9 @@ export default function CategoryPage() {
         })
     }
 
-    const finishSave = function () {
-        loadData(pagination.offset, pagination.limit, pagination.key, pagination.value, function () {
-            setOpen(false)
-        })
+    const finishSave = () => {
+        setLoaded(false)
+        setOpen(false)
     }
 
     const editDetail = (_category) => {
@@ -69,7 +66,7 @@ export default function CategoryPage() {
     }
 
     const addItem = () => {
-        let _category    = {}
+        let _category = {}
         Object.entries(tableKeys).forEach(([k, v]) => {
             _category[k] = v.value
         })
@@ -79,20 +76,19 @@ export default function CategoryPage() {
 
     return (
         <div className="mx-4 w-auto">
+            <AdminTable
+                loaded={loaded}
+                dict={tableKeys}
+                loadData={loadData}
+                actions={[{ name: "编辑内容", func: editDetail }]}
+                addItem={addItem}
+            />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <AdminTable
-                        total={data.Total}
-                        items={data.Items}
-                        dict={tableKeys}
-                        loadData={loadData}
-                        actions={[{name: "编辑内容", func: editDetail}]}
-                        addItem={addItem}
-                    />
+                <DialogTrigger >
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{ !category || category.ID === 0 ? "新添内容" : "编辑内容，ID：" + category.ID}</DialogTitle>
+                        <DialogTitle>{!category || category.ID === 0 ? "新添内容" : "编辑内容，ID：" + category.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={category} saved={finishSave} />
@@ -103,7 +99,7 @@ export default function CategoryPage() {
 }
 
 export function ProfileForm({ item, saved }) {
-    const categoryUpdate = function (event) {
+    const categoryUpdate = (event) => {
         API.categoryUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
@@ -119,11 +115,11 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={categoryUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <input type="hidden" name="ID" value={item.id} />
-                    <FormImage name={tableKeys.IconURL.name} column="IconURL" value={item.IconURL} />
+                    <input type="hidden" name="ID" value={item.ID} />
+                    <FormImage name={tableKeys.IconURL.name} column="IconURL" value={item.IconURL} count={1} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
-                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} isImage={true} />
+                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} count={1} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

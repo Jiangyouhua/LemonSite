@@ -14,3 +14,17 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+
+## Uncaught TypeError: Cannot read properties of undefined (reading 'then')
+
+* submit方法里，最后少了返回。
+* post方法里，最后少了返回。
+
+## Shadcn 全部更新
+
+```
+unset http_proxy
+unset https_proxy
+npx shadcn@latest add -a -y -o
+```

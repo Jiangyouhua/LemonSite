@@ -1,6 +1,5 @@
 
 import { ChevronRight } from "lucide-react"
-import { useLocation } from "react-router-dom"
 import {
     Collapsible,
     CollapsibleContent,
@@ -17,10 +16,10 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { AdminMenus } from '../lib/data'
+import { useLocalStorage } from "@uidotdev/usehooks"
 
 export function AdminMenu() {
-    const location = useLocation();
-    const pathname = location.pathname ?? "/user"
+    const [navs,] = useLocalStorage("navs")
 
     return (
         <SidebarGroup>
@@ -30,7 +29,7 @@ export function AdminMenu() {
                     <Collapsible
                         key={item.title}
                         asChild
-                        defaultOpen={item.children.filter((it) => new URL(it.url, "http:/localhost").pathname === pathname).length > 0}
+                        defaultOpen={navs.length > 0 && item.children.filter((it) => it.url === navs[1].url).length > 0}
                         className="group/collapsible"
                     >
                         <SidebarMenuItem>

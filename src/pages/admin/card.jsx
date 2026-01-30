@@ -18,15 +18,15 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
-const repeatTags = ['未设置', '日', '周', '月', '年'].map((item, index) => {return {ID:index, Name: item}})
-const kindTags = ["未设置", "积分","现金"].map((item, index) => {return {ID:index, Name: item}})
+const repeatTags = ['未设置', '日', '周', '月', '年'].map((item, index) => { return { ID: index, Name: item } })
+const kindTags = ["未设置", "积分", "现金"].map((item, index) => { return { ID: index, Name: item } })
 const tableKeys = {
     ID: Seer(0, "ID", true),
-    Category: Seer("", "种类",true, (v) => v.Name),
+    Category: Seer("", "种类", true, (v) => v.Name),
     Name: Seer("", "名称", true),
     Description: Seer("", "描述", true),
-    StartTime: Seer(0,"开始时间", true,  (v) => v+":00" ),
-    EndTime: Seer(0,"开始时间", true,  (v) => v+":00" ),
+    StartTime: Seer(0, "开始时间", true, (v) => v + ":00"),
+    EndTime: Seer(0, "开始时间", true, (v) => v + ":00"),
     Kind: Seer("", "获利类型", true, (v) => kindTags[v].Name),
     Score: Seer(0, "积分", true),
     Money: Seer(0, "现金", true),
@@ -35,10 +35,9 @@ const tableKeys = {
 }
 
 export default function CardPage() {
+    const [loaded, setLoaded] = useState(false)
     const [open, setOpen] = useState(false)
     const [card, setCard] = useState()
-    const [data, setData] = useState({ Total: 0, Items: [] })
-    const [pagination, setPagination] = useState({offset:0, limit: 0, key: "", value:""})
     const [, setNavs] = useLocalStorage("navs", [])
 
     useEffect(() => {
@@ -46,14 +45,13 @@ export default function CardPage() {
             { name: "打卡管理", url: "/admin" },
             { name: "打卡项目", url: "/admin/card" },
         ])
-    }, [setNavs])    
+    }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
         API.cardAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+            setLoaded(true)
             if (result.Succeed) {
-                setPagination({offset:offset, limit: limit, key: key, value:value})
-                setData(result.Data)
-                back(result.Data.Total)
+                back(result.Data)
             } else {
                 toast.error("数据加载失败，请稍后再试")
             }
@@ -62,10 +60,9 @@ export default function CardPage() {
         })
     }
 
-    const finishSave = function () {
-        loadData(pagination.offset, pagination.limit, pagination.key, pagination.value, function () {
-            setOpen(false)
-        })
+    const finishSave = () => {
+        setLoaded(false)
+        setOpen(false)
     }
 
     const editDetail = (_card) => {
@@ -74,7 +71,7 @@ export default function CardPage() {
     }
 
     const addItem = () => {
-        let _card    = {}
+        let _card = {}
         Object.entries(tableKeys).forEach(([k, v]) => {
             _card[k] = v.value
         })
@@ -84,20 +81,19 @@ export default function CardPage() {
 
     return (
         <div className="mx-4 w-auto">
+            <AdminTable
+                loaded={loaded}
+                dict={tableKeys}
+                loadData={loadData}
+                actions={[{ name: "编辑内容", func: editDetail }]}
+                addItem={addItem}
+            />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <AdminTable
-                        total={data.Total}
-                        items={data.Items}
-                        dict={tableKeys}
-                        loadData={loadData}
-                        actions={[{name: "编辑内容", func: editDetail}]}
-                        addItem={addItem}
-                    />
+                <DialogTrigger >
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{ !card || card.ID === 0 ? "新添内容" : "编辑内容，ID：" + card.ID}</DialogTitle>
+                        <DialogTitle>{!card || card.ID === 0 ? "新添内容" : "编辑内容，ID：" + card.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm item={card} saved={finishSave} />
@@ -110,7 +106,7 @@ export default function CardPage() {
 export function ProfileForm({ item, saved }) {
     const [loaded, setLoaded] = useState(false)
     const [categories, setCategories] = useState([])
-    const cardUpdate = function (event) {
+    const cardUpdate = (event) => {
         API.cardUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
@@ -139,7 +135,7 @@ export function ProfileForm({ item, saved }) {
         <form className="grid items-start gap-6" onSubmit={cardUpdate} >
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                     <input type="hidden" name="ID" value={item.id} />
+                    <input type="hidden" name="ID" value={item.ID} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
                     <FormSelect name={tableKeys.Category.name} column="CategoryID" value={item.CategoryID} options={categories} />
@@ -147,7 +143,7 @@ export function ProfileForm({ item, saved }) {
                     <FormInput type="number" name={tableKeys.EndTime.name} column="EndTime" value={item.EndTime} />
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
                     <FormInput type="number" name={tableKeys.Score.name} column="Score" value={item.Score} />
-                    <FormInput type="number" name={tableKeys.Money.name} column="Money" value={item.Money} />   
+                    <FormInput type="number" name={tableKeys.Money.name} column="Money" value={item.Money} />
                     <FormSelect name={tableKeys.Repeat.name} column="Repeat" value={item.Repeat} options={repeatTags} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>

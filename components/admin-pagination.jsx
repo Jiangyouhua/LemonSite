@@ -21,22 +21,22 @@ export default function AdminPagination({total, limit, page, loadData}){
     const [pageTotal, setPageTotal] = useState(0) // 页面总数
     const [pageTags, setPageTags] = useState([]) // 可操作页面
 
-     const limitUpdate = function (value) {
+     const limitUpdate =(value) => {
         const _limie = +value
         pageTagsFormat(page, _limie, total)
-        loadData(page, limit, back)
+        loadData(page, limit, finishBack)
     }
 
-    const pageUpdate = function (action, number) {
+    const pageUpdate = (action, number) => {
         let p = action == 0 ? number : page + action
         const _page = Math.max(0, Math.min(p, pageTotal))
         pageTagsFormat(_page, limit, total)
         if (_page !== page) {
-            loadData(_page, limit, back)
+            loadData(_page, limit, finishBack)
         }
     }
 
-    const pageTagsFormat = function (_index, _limit, _total) {
+    const pageTagsFormat = (_index, _limit, _total) => {
         const max = _total % _limit == 0 ? total / _limit - 1 : total / _limit
         const start = Math.max(0, _index - 2)
         const end = Math.min(max, _index + 2)
@@ -50,7 +50,7 @@ export default function AdminPagination({total, limit, page, loadData}){
         setPageTags([...p])
     }
 
-    const back = function (_total) {
+    const finishBack = (_total) => {
         pageTagsFormat(page, limit, _total)
     }
     

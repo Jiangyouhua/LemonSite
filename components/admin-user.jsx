@@ -29,7 +29,7 @@ import { useLocalStorage } from "@uidotdev/usehooks"
 export default function AdminUser() {
     const [user, setUser] = useLocalStorage("user")
     const [_, setAuth] = useLocalStorage("auth")
-    const logoutHandel = function () {
+    const logoutHandel = () => {
         setUser(null)
         setAuth(false)
         localStorage.setItem("token", "")
@@ -40,7 +40,7 @@ export default function AdminUser() {
         <SidebarMenu>
             <SidebarMenuItem>
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    <DropdownMenuTrigger >
                         <SidebarMenuButton
                             size="lg"
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"

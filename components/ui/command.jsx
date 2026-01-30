@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { SearchIcon } from "lucide-react"
@@ -27,6 +29,8 @@ function Command({
 }
 
 function CommandDialog({
+  title = "Command Palette",
+  description = "Search for a command to run...",
   children,
   className,
   showCloseButton = true,
@@ -35,8 +39,8 @@ function CommandDialog({
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
-        <DialogTitle>编辑内容</DialogTitle>
-        <DialogDescription>点击锁图标，可编辑</DialogDescription>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <DialogContent
         className={cn("overflow-hidden p-0", className)}

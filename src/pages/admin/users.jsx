@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
 import { API } from "@/src/API"
@@ -16,7 +16,7 @@ import {
 import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
-import FormAvatar from "@/components/Form-avatar"
+import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
 import { StatusTags } from "@/lib/data"
 
@@ -46,25 +46,16 @@ const tableKeys = {
 }
 
 export default function UsersPage() {
+    const [loaded, setLoaded] = useState(false)
     const [open, setOpen] = useState(false)
     const [user, setUser] = useState()
-    const [data, setData] = useState({ Total: 0, Items: [] })
-    const [pagination, setPagination] = useState({ offset: 0, limit: 0, key: "", value: "" })
     const [, setNavs] = useLocalStorage("navs", [])
-
-    useEffect(() => {
-        setNavs([
-            { name: "用户管理", url: "/admin" },
-            { name: "用户明细", url: "/admin/user" },
-        ])
-    }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
         API.userAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+            setLoaded(true)
             if (result.Succeed) {
-                setPagination({ offset: offset, limit: limit, key: key, value: value })
-                setData(result.Data)
-                back(result.Data.Total)
+                back(result.Data)
             } else {
                 toast.error("数据加载失败，请稍后再试")
             }
@@ -73,10 +64,9 @@ export default function UsersPage() {
         })
     }
 
-    const finishSave = function () {
-        loadData(pagination.offset, pagination.limit, pagination.key, pagination.value, function () {
-            setOpen(false)
-        })
+    const finishSave = () => {
+        setLoaded(false)
+        setOpen(false)
     }
 
     const editDetail = (_user) => {
@@ -93,7 +83,7 @@ export default function UsersPage() {
     }
 
     const addItem = () => {
-        let _user = {Addresses:[], Banks: []}
+        let _user = { Addresses: [], Banks: [] }
         Object.entries(tableKeys).forEach(([k, v]) => {
             _user[k] = v.value
         })
@@ -101,25 +91,31 @@ export default function UsersPage() {
         setOpen(true)
     }
 
+    useEffect(() => {
+        setNavs([
+            { name: "用户管理", url: "/admin" },
+            { name: "用户明细", url: "/admin/user" },
+        ])
+    }, [setNavs])
+
     return (
         <div className="mx-4 w-auto">
+            <AdminTable
+                loaded={loaded}
+                dict={tableKeys}
+                loadData={loadData}
+                actions={[{ name: "编辑内容", func: editDetail }, { name: "收货地址", func: showAddress }, { name: "银行账号", func: showBank },]}
+                addItem={addItem}
+            />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <AdminTable
-                        total={data.Total}
-                        items={data.Items}
-                        dict={tableKeys}
-                        loadData={loadData}
-                        actions={[ { name: "编辑内容", func: editDetail }, { name: "收货地址", func: showAddress }, { name: "银行账号", func: showBank },]}
-                        addItem={addItem}
-                    />
+                <DialogTrigger >
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{ !user || user.ID === 0 ? "新添内容" : "编辑内容，ID：" + user.ID}</DialogTitle>
+                        <DialogTitle>{!user || user.ID === 0 ? "新添内容" : "编辑内容，ID：" + user.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={user} saved={finishSave} /> 
+                    <ProfileForm item={user} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
@@ -128,11 +124,18 @@ export default function UsersPage() {
 
 export function ProfileForm({ item, saved, edit }) {
     const [user, setUser] = useLocalStorage("user")
-    const userUpdate = function (event) {
+    const userUpdate = (event) => {
         API.userUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 if (result.Data.ID === user.ID) {
-                    setUser(result.Data)
+                    let u = user
+                    for (let x in result.Data) {
+                        if (!result.Data[x]) {
+                            continue
+                        }
+                        u[x] = result.Data[x]
+                    }
+                    setUser(u)
                 }
                 saved()
             } else {
@@ -147,13 +150,11 @@ export function ProfileForm({ item, saved, edit }) {
         <form className="grid items-start gap-6" onSubmit={userUpdate} aria-disabled={!edit}>
             <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
                 <div className="px-[4px] ">
-                    <div className="text-center">
-                        <FormAvatar name="头像" column="AvatarURL" holder={item.Name} value={item.AvatarURL} />
-                    </div>
-                    <input type="hidden" name="ID" value={item.id} />
-                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} block={true}/>
+                    <input type="hidden" name="ID" value={item.ID} />
+                    <FormImage name={tableKeys.AvatarURL.name} column="AvatarURL" value={item.AvatarURL} count={1} />
+                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} block={true} />
                     <FormInput name={tableKeys.RealName.name} column="RealName" value={item.RealName} block={true} />
-                    <FormInput name={tableKeys.Phone.name} column="Phone" value={item.Phone} block={true}/>
+                    <FormInput name={tableKeys.Phone.name} column="Phone" value={item.Phone} block={true} />
                     <FormInput name={tableKeys.Email.name} column="Email" value={item.Email} />
                     <FormInput name={tableKeys.LoginPassword.name} column="LoginPassword" value="" />
                     <FormInput name={tableKeys.TransactionPassword.name} column="TransactionPassword" value="" />

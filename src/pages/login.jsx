@@ -11,21 +11,23 @@ export default function LoginPage() {
     const [, setAuth] = useLocalStorage("auth")
 
     const handleSubmit = (event) => {
-        API.login.submit(event).then( (result) =>{
-            if (result.Succeed) {
-                const data = result.Data
-                setUser(data);
-                setAuth(!!data.Token && data.Token.length > 0 )
-                localStorage.setItem("token", data.Token)
-                window.location = "/admin"
-                toast.success("登录成功")
-            } else {
-                toast.error("邮箱或密码错误")
-            }
-        })
-        .catch( (error) => {
-            console.error(error)
-        })
+        event.preventDefault()
+        API.login.submit(event)
+            .then((result) => {
+                if (result.Succeed) {
+                    const data = result.Data
+                    setUser(data);
+                    setAuth(!!data.Token && data.Token.length > 0)
+                    localStorage.setItem("token", data.Token)
+                    window.location = "/admin"
+                    toast.success("登录成功")
+                } else {
+                    toast.error("邮箱或密码错误")
+                }
+            })
+            .catch((error) => {
+                console.error(error)
+            })
     }
     return (
         <div className="grid grid-cols-2 gap-0">

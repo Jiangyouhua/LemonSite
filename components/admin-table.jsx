@@ -35,17 +35,18 @@ import {
 import { Label } from "@/components/ui/label"
 import MoreMenu from "./more-menu"
 
-export default function AdminTable({ total, items, dict, loadData, addItem, actions}) {
+export default function AdminTable({ loaded, dict, loadData, addItem, actions }) {
     const [key, setKey] = useState("")
+    const [items, setItems] = useState([])
+    const [total, setTotal] = useState(0)
     const [value, setValue] = useState("")
-    const [loaded, setLoaded] = useState(false)
     const [page, setPage] = useState(0) // 当前页
     const [limit, setLimit] = useState(10)  // 各页数
     const [pageTags, setPageTags] = useState([]) // 可操作页面
     const [pageTotal, setPageTotal] = useState(0) // 页面总数
     const [columns, setColumns] = useState(Object.keys(dict).map((key) => { return { name: key, checked: dict[key].show } }).filter((v) => v.checked))   // 表头列名
 
-    const selectUpdate = function (name) {
+    const selectUpdate = (name) => {
         columns.forEach((item, index) => {
             if (item.name === name) {
                 columns[index].checked = !item.checked
@@ -54,28 +55,28 @@ export default function AdminTable({ total, items, dict, loadData, addItem, acti
         setColumns([...columns])
     }
 
-    const search = function () {
-        loadData(page, limit, key, value, back)
+    const search = () => {
+        loadData(page, limit, key, value, finishBack)
     }
 
-    const limitUpdate = function (value) {
+    const limitUpdate = (value) => {
         const _limie = +value
         setLimit(_limie)
         pageTagsFormat(page, _limie, total)
-        loadData(page, limit, key, value, back)
+        loadData(page, limit, key, value, finishBack)
     }
 
-    const pageUpdate = function (action, number) {
+    const pageUpdate = (action, number) => {
         let p = action == 0 ? number : page + action
         const _page = Math.max(0, Math.min(p, pageTotal))
         pageTagsFormat(_page, limit, total)
         if (_page !== page) {
             setPage(_page)
-            loadData(_page, limit, key, value, back)
+            loadData(_page, limit, key, value, finishBack)
         }
     }
 
-    const pageTagsFormat = function (_index, _limit, _total) {
+    const pageTagsFormat = (_index, _limit, _total) => {
         const max = _total % _limit == 0 ? total / _limit - 1 : total / _limit
         const start = Math.max(0, _index - 2)
         const end = Math.min(max, _index + 2)
@@ -89,13 +90,14 @@ export default function AdminTable({ total, items, dict, loadData, addItem, acti
         setPageTags([...p])
     }
 
-    const back = function (_total) {
-        pageTagsFormat(page, limit, _total)
+    const finishBack = (data) => {
+        setItems(data.Items)
+        setTotal(data.Total)
+        pageTagsFormat(page, limit, data.Total)
     }
 
     if (!loaded) {
-        setLoaded(true)
-        loadData(page, limit, key, value, back)
+        loadData(page, limit, key, value, finishBack)
     }
 
     return (
@@ -117,7 +119,7 @@ export default function AdminTable({ total, items, dict, loadData, addItem, acti
             <div className="flex items-center py-4">
                 <LimitSelecter limit={limit} limitUpdate={limitUpdate} />
                 <div className="flex w-full"></div>
-                <PaginationTabler className="max-w-sm"  current={page} pages={pageTags} pageTotal={pageTotal} pageUpdate={pageUpdate} />
+                <PaginationTabler className="max-w-sm" current={page} pages={pageTags} pageTotal={pageTotal} pageUpdate={pageUpdate} />
             </div>
         </div >
     )
@@ -143,7 +145,7 @@ export function SeachSelecter({ columns, dict, keyUpdate }) {
 export function HeadTabler({ columns, dict }) {
     return (
         <TableHeader>
-            <TableRow>
+            <TableRow onClick={(e) => e.preventDefault()}>
                 <TableHead key='head_index' className="text-center">序号</TableHead>
                 {columns.map((column) => (
                     <TableHead key={"head_" + column.name} className={column.checked ? 'visible' : 'hidden'} >
@@ -160,7 +162,7 @@ export function BodyTabler({ rows, columns, dict, actions }) {
     return (
         <TableBody>
             {rows.map((row, index) => (
-                <TableRow key={"row_" + index}>
+                <TableRow key={"row_" + index} onClick={(e) => e.preventDefault}>
                     <TableCell key={"row_index_" + index} className="text-center"> {index} </TableCell>
                     {columns.map((column) => (
                         <TableCell key={'row_' + column.name + "_" + index} className={(column.checked ? 'visible' : 'hidden') + " max-w-24 overflow-ellipsis overflow-hidden whitespace-nowrap"}>
@@ -172,7 +174,7 @@ export function BodyTabler({ rows, columns, dict, actions }) {
                     </TableCell>
                 </TableRow>
             ))}
-        </TableBody>    
+        </TableBody>
     )
 }
 
@@ -201,7 +203,7 @@ export function LimitSelecter({ limit, limitUpdate }) {
 export function ColumnSelecter({ columns, selectUpdate }) {
     return (
         <DropdownMenu >
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger >
                 <Button variant="outline" className="ml-auto">
                     选择显示列 <ChevronDown />
                 </Button>
