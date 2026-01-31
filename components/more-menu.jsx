@@ -12,7 +12,9 @@ export default function MoreMenu({item, actions}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger >
-        <Button variant="outline"><MoreHorizontal className="h-4 w-4" /></Button>
+        <span className="h-4 w-4 p-4">
+        <MoreHorizontal  />
+        </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>

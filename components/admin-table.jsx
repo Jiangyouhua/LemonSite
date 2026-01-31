@@ -37,11 +37,11 @@ import MoreMenu from "./more-menu"
 
 export default function AdminTable({ loaded, dict, loadData, addItem, actions }) {
     const [key, setKey] = useState("")
-    const [items, setItems] = useState([])
-    const [total, setTotal] = useState(0)
     const [value, setValue] = useState("")
     const [page, setPage] = useState(0) // 当前页
     const [limit, setLimit] = useState(10)  // 各页数
+    const [items, setItems] = useState([])
+    const [total, setTotal] = useState(0)
     const [pageTags, setPageTags] = useState([]) // 可操作页面
     const [pageTotal, setPageTotal] = useState(0) // 页面总数
     const [columns, setColumns] = useState(Object.keys(dict).map((key) => { return { name: key, checked: dict[key].show } }).filter((v) => v.checked))   // 表头列名
@@ -203,7 +203,7 @@ export function LimitSelecter({ limit, limitUpdate }) {
 export function ColumnSelecter({ columns, selectUpdate }) {
     return (
         <DropdownMenu >
-            <DropdownMenuTrigger >
+            <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">
                     选择显示列 <ChevronDown />
                 </Button>

@@ -41,7 +41,7 @@ export default function FeedbackPage() {
     }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.feedbackAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.feedbackAll.get({limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -55,7 +55,6 @@ export default function FeedbackPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_feedback) => {
@@ -72,7 +71,7 @@ export default function FeedbackPage() {
                 actions={[{ name: "编辑内容", func: editDetail }]}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -88,7 +87,7 @@ export default function FeedbackPage() {
 
 export function ProfileForm({ item, saved }) {
     const feedbackUpdate = (event) => {
-        API.feedbackUpdate.submit(event).then((result) => {
+        API.feedbackUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -100,16 +99,16 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={feedbackUpdate} >
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  >
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormInput name={tableKeys.Content.name} column="Content" value={item.Content} block={true} />
                     <FormInput name={tableKeys.Reply.name} column="Reply" value={item.Reply} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={feedbackUpdate}>保存更新</Button>
         </form>
     )
 }

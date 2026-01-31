@@ -1,120 +1,107 @@
-import { useState } from 'react';
-import {
-    Tags,
-    TagsContent,
-    TagsEmpty,
-    TagsGroup,
-    TagsInput,
-    TagsItem,
-    TagsList,
-    TagsTrigger,
-    TagsValue,
-} from '@/components/ui/tags';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Pen, Lock, Shield, CheckIcon, PlusIcon } from "lucide-react"
+import { useState } from "react";
+import { Button } from '@/components/ui/button'
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { Pen, Lock, Shield } from "lucide-react"
+import { toast } from "sonner";
 
-export default function FormTags({ name, column, value, optionWords, block }) {
+
+export default function FromTags({ name, value, column, loadOptions, block }) {
+    const [loaded, setLoaded] = useState(false)
     const [disabled, setDisabled] = useState(true)
-    const [items, setItems] = useState(value)
-    const selectedWords = (_words) => {
-        setItems(_words)
+    const [word, setWord] = useState("")
+    const [tags, setTags] = useState(value ?? [])
+    const [options, setOptions] = useState([])
+
+    const inputKeyUp = (event) => {
+        if (event.keyCode == 13) {
+            let text = event.target.value.trim()
+            if (!text || text.length === 0) {
+                return
+            }
+            if (tags.includes(text)) {
+                toast.error("该标签已存在")
+                return
+            }
+            setTags((prev) => [...prev, text])
+            setWord("")
+            event.target.value = ""
+            event.target.focus()
+        }
     }
 
-    return (
-        <div className="grid gap-0 py-2">
-            <Label>
-                <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
-                    {disabled ? (!block ? <Lock /> : <Shield />) : <Pen />}
-                </Button>
-                {name}:
-            </Label>
-            {!items ? <></> : items.map((item, index) => {
-                return (<Input key={column + "_tag_" + index} type='hidden' id={column} name={`${column}.${index}`} disabled={disabled} defaultValue={item} />)
-            })}
+    const removeTag = (text) => {
+        setTags((prev) => prev.filter((tag) => tag !== text))
+    }
 
-            <TagSelect id={column} disabled={disabled} optionWords={optionWords} selectedWords={selectedWords} />
-        </div>
-    )
-}
+    const addTag = (text) => {
+        removeTag(text)
+        setTags((prev) => [...prev, text])
+    }
 
-const TagSelect = ({ disabled, optionWords, selectedWords }) => {
-    const [load, setLoad] = useState(false)
-    const [selected, setSelected] = useState([]);
-    const [newTag, setNewTag] = useState('');
-    const [tags, setTags] = useState([]);
-
-    const removeTag = (_value) => {
-        if (!selected.includes(_value)) {
-            return;
-        }
-        let _words = selected.filter((v) => v != _value)
-        setSelected(_words);
-        selectedWords(_words)
-    };
-
-    const handleSelect = (_value) => {
-        if (selected.includes(_value)) {
-            removeTag(_value);
-            return;
-        }
-        let _words = [...selected, _value]
-        setSelected(_words);
-        selectedWords(_words)
-        setNewTag('');
-    };
-
-    const handleCreateTag = () => {
-        setTags((prev) => [...prev, newTag]);
-        let _words = [...selected, newTag]
-        setSelected(_words);
-        selectedWords(_words)
-        setNewTag('');
-    };
-
-    if (!load) {
-        setLoad(true)
-        optionWords(function (words) {
-            setTags(words)
+    if (!loaded) {
+        loadOptions((_options) => {
+            setLoaded(true)
+            setOptions(_options)
         })
     }
 
     return (
-        <Tags className="w-full">
-            <TagsTrigger disabled={disabled} >
-                {selected.map((tag) => (
-                    <TagsValue key={tag} onRemove={() => removeTag(tag)}>
-                        {tags.find((t) => t === tag)}
-                    </TagsValue>
-                ))}
-            </TagsTrigger>
-            <TagsContent>
-                <TagsInput onValueChange={setNewTag} placeholder="输入搜索..." />
-                <TagsList>
-                    <TagsEmpty>
-                        <button
-                            className="mx-auto flex cursor-pointer items-center gap-2"
-                            onClick={handleCreateTag}
-                            type="button"
-                        >
-                            <PlusIcon className="text-muted-foreground" size={14} />
-                            新添: {newTag}
-                        </button>
-                    </TagsEmpty>
-                    <TagsGroup>
-                        {tags.map((tag) => (
-                            <TagsItem key={tag} onSelect={handleSelect} value={tag}>
-                                {tag}
-                                {selected.includes(tag) && (
-                                    <CheckIcon className="text-muted-foreground" size={14} />
-                                )}
-                            </TagsItem>
-                        ))}
-                    </TagsGroup>
-                </TagsList>
-            </TagsContent>
-        </Tags>
-    );
-};
-
+        <div>
+            <Label>
+                <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
+                    { disabled ? (!block ? <Lock /> : <Shield />) : <Pen /> }
+                </Button>
+                {name}:
+            </Label>
+            {
+                (!tags || tags.length === 0) ?
+                    <p className="text-center border rounded-md p-1 mb-2"><small>无内容</small></p>
+                    :
+                    <div className="pb-3 pt-1">
+                        {tags.map((text, index) => {
+                            return (
+                                <span key={"select_tag_" + index} >
+                                    <span className="border rounded-md px-3 py-2 text-sm">
+                                        {text}
+                                        {disabled || block ? <></> :
+                                            <>
+                                                &nbsp;&nbsp;
+                                                <input type="button" className="text-sm" onClick={(e) => { e.preventDefault; removeTag(text) }} value="✕" />
+                                            </>
+                                        }
+                                    </span>
+                                    &nbsp;
+                                    <input type="hidden" name={`${column}.${index}`} value={text} />
+                                </span>
+                            )
+                        })}
+                    </div>
+            }
+            {   
+                disabled || block ? 
+                <></> 
+                :
+                <div className="border rounded-md text-sm">
+                    <Input className="border-0 shadow-none input-tag" type="text" onKeyUp={inputKeyUp} placeholder="输入后，回车添加……" onChange={(e) => { e.preventDefault; setWord(e.target.value) }} defaultValue={word} />
+                    <div className="mx-2">
+                        <Separator />
+                        <div className="my-2">
+                            {
+                                options.filter(w => !tags.includes(w) && (!word || w.includes(word))).map((text, index) => {
+                                    return (
+                                        <span key={"option_tag_" + index}>
+                                            <Input className='w-fit' type="button" value={text} onClick={(e) => { e.preventDefault; addTag(text) }} />
+                                            &nbsp;
+                                        </span>
+                                    )
+                                })
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    )
+}

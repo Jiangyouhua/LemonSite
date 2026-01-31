@@ -14,9 +14,9 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog"
 import AdminTable from "@/components/admin-table"
+import CellImage from "@/components/cell-image"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
-import CellAvatar from "@/components/cell-avatar"
 import FormTags from "@/components/form-tags"
 import FormImage from "@/components/form-image"
 
@@ -25,7 +25,7 @@ const kindTags = ['未设置', '积分', '价格'].map((item, index) => { return
 
 const tableKeys = {
     ID: Seer(0, "ID", true),
-    ImageURL: Seer([], "产品图片", true, (v) => <CellAvatar url={v} />),
+    ImageURL: Seer([], "产品图片", true, (v) => <CellImage url={!v || v.length < 1 ? "" : v[0]} />),
     Name: Seer("", "名称", true),
     Slogan: Seer("", "广告语", true),
     Description: Seer("", "说明", true),
@@ -37,7 +37,7 @@ const tableKeys = {
     Price: Seer(0, "价格", true),
     PriceExplanation: Seer("", "价格说明", true),
     Inventory: Seer("", "库存", true),
-    IntroduceURL: Seer([], "推广图片", true, (v) => <CellAvatar url={v} />),
+    IntroduceURL: Seer([], "推广图片", true, (v) => <CellImage url={!v || v.length < 1 ? "" : v[0]} />),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -55,7 +55,7 @@ export default function GoodsPage() {
     }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.goodsAll.get({ limit: limit, offset: offset }).then((result) => {
+        API.goodsAll.get({ limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -69,7 +69,6 @@ export default function GoodsPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_goods) => {
@@ -111,10 +110,9 @@ export default function GoodsPage() {
 }
 
 export function ProfileForm({ item, saved }) {
-    const [load, setLoad] = useState(false)
 
     const goodsUpdate = (event) => {
-        API.goodsUpdate.submit(event).then((result) => {
+        API.goodsUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -128,9 +126,6 @@ export function ProfileForm({ item, saved }) {
     const goodsPromotional = (back) => {
         API.goodsPromotional.get().then((result) => {
             if (result.Succeed) {
-                if (!result.Data || !back) {
-                    return
-                }
                 back(result.Data)
             } else {
                 toast.error(result.Message)
@@ -141,9 +136,6 @@ export function ProfileForm({ item, saved }) {
     const goodsTags = (back) => {
         API.goodsTags.get().then((result) => {
             if (result.Succeed) {
-                if (!result.Data || !back) {
-                    return
-                }
                 back(result.Data)
             } else {
                 console.error(result.Message)
@@ -151,34 +143,28 @@ export function ProfileForm({ item, saved }) {
         })
     }
 
-    if (!load) {
-        setLoad(true)
-        goodsTags()
-        goodsPromotional()
-    }
-
     return (
-        <form className="grid items-start gap-6" onSubmit={goodsUpdate} >
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6" id="form" >
+            <ScrollArea className="h-140 m-[-16px] p-[16px]">
+                <div>
                     <input type="hidden" name="ID" value={item.ID} />
-                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} count={9} />
+                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} count={10} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Slogan.name} column="Slogan" value={item.Slogan} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
-                    <FormTags name={tableKeys.Tags.name} column="Tags" value={item.Tags} optionWords={goodsTags} />
-                    <FormTags name={tableKeys.Promotional.name} column="Promotional" value={item.Promotional} optionWords={goodsPromotional} />
+                    <FormTags name={tableKeys.Tags.name} column="Tags" value={item.Tags} loadOptions={goodsTags} />
+                    <FormTags name={tableKeys.Promotional.name} column="Promotional" value={item.Promotional} loadOptions={goodsPromotional} />
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" />
                     <FormInput name={tableKeys.ScoreExplanation.name} column="ScoreExplanation" value={item.ScoreExplanation} />
                     <FormInput name={tableKeys.Price.name} column="Price" value={item.Price} type="number" />
                     <FormInput name={tableKeys.PriceExplanation.name} column="PriceExplanation" value={item.PriceExplanation} />
                     <FormInput name={tableKeys.Inventory.name} column="Inventory" value={item.Inventory} type="number" />
-                    <FormImage name={tableKeys.IntroduceURL.name} column="IntroduceURL" value={item.IntroduceURL} count={9} />
+                    <FormImage name={tableKeys.IntroduceURL.name} column="IntroduceURL" value={item.IntroduceURL} count={20} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={goodsUpdate}>保存更新</Button>
         </form>
     )
 }

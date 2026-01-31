@@ -48,7 +48,7 @@ export default function CardPage() {
     }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.cardAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.cardAll.get({limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -62,7 +62,6 @@ export default function CardPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_card) => {
@@ -89,7 +88,7 @@ export default function CardPage() {
                 addItem={addItem}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -107,7 +106,7 @@ export function ProfileForm({ item, saved }) {
     const [loaded, setLoaded] = useState(false)
     const [categories, setCategories] = useState([])
     const cardUpdate = (event) => {
-        API.cardUpdate.submit(event).then((result) => {
+        API.cardUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -132,9 +131,9 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={cardUpdate} >
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  >
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
@@ -148,7 +147,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={cardUpdate}>保存更新</Button>
         </form>
     )
 }

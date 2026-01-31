@@ -61,9 +61,8 @@ String.prototype.request = function (method, data = undefined) {
         .catch(err => { throw err })
 };
 
-String.prototype.submit = function (event) {
-    event.preventDefault()
-    const formData = new FormData(event.target)
+String.prototype.submit = function (target) {
+    const formData = new FormData(target)
     let data = {};
     formData.forEach((value, key) => {
         let arr = key.split(".")
@@ -73,7 +72,7 @@ String.prototype.submit = function (event) {
         }
         data[arr[0]] = [...(data[arr[0]] ?? []), value]
     })
-    const inputs = event.target.querySelectorAll("input[type='number']:enabled")
+    const inputs = target.querySelectorAll("input[type='number']:enabled")
 
     inputs.forEach(element => {
         data[element.getAttribute("name")] = +element.value

@@ -42,7 +42,7 @@ export default function CheckPage() {
     }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.checkAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.checkAll.get({limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -56,7 +56,6 @@ export default function CheckPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_check) => {
@@ -73,7 +72,7 @@ export default function CheckPage() {
                 actions={[{ name: "编辑内容", func: editDetail }]}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -89,7 +88,7 @@ export default function CheckPage() {
 
 export function ProfileForm({ item, saved }) {
     const checkUpdate = (event) => {
-        API.checkUpdate.submit(event).then((result) => {
+        API.checkUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -101,16 +100,16 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={checkUpdate} >
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  >
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" block={true} />
                     <FormInput name={tableKeys.Money.name} column="Money" value={item.Money} type="number" block={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={checkUpdate}>保存更新</Button>
         </form>
     )
 }

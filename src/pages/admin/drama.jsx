@@ -16,9 +16,9 @@ import {
 import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
-import CellAvatar from "@/components/cell-avatar"
 import FormTags from "@/components/form-tags"
 import FormImage from "@/components/form-image"
+import CellImage from "@/components/cell-image"
 
 const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => { return { ID: index, Name: item } })
 
@@ -28,7 +28,7 @@ const tableKeys = {
     Author: Seer("", "作者", true),
     Publisher: Seer("", "出版社", true),
     ISBN: Seer("", "ISBN", true),
-    ImageURL: Seer([], "产品图片", true, (v) => <CellAvatar url={v} />),
+    ImageURL: Seer([], "产品图片", true, (v) => <CellImage url={v} />),
     ReleaseDate: Seer("", "发布日期", true),
     Slogan: Seer("", "广告语", true),
     Description: Seer("", "说明", true),
@@ -71,7 +71,6 @@ export default function DramaPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_drama) => {
@@ -103,7 +102,7 @@ export default function DramaPage() {
                 addItem={addItem}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -118,10 +117,8 @@ export default function DramaPage() {
 }
 
 export function ProfileForm({ item, saved }) {
-    const [load, setLoad] = useState(false)
-
     const dramaUpdate = (event) => {
-        API.dramaUpdate.submit(event).then((result) => {
+        API.dramaUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -135,9 +132,6 @@ export function ProfileForm({ item, saved }) {
     const dramaTags = (back) => {
         API.dramaTags.get().then((result) => {
             if (result.Succeed) {
-                if (!result.Data || !back) {
-                    return
-                }
                 back(result.Data)
             } else {
                 console.error(result.Message)
@@ -145,15 +139,10 @@ export function ProfileForm({ item, saved }) {
         })
     }
 
-    if (!load) {
-        setLoad(true)
-        dramaTags()
-    }
-
     return (
-        <form className="grid items-start gap-6" onSubmit={dramaUpdate} >
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  >
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} count={9} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
@@ -163,7 +152,7 @@ export function ProfileForm({ item, saved }) {
                     <FormInput name={tableKeys.ReleaseDate.name} column="ReleaseDate" value={item.ReleaseDate} type="date" />
                     <FormInput name={tableKeys.Slogan.name} column="Slogan" value={item.Slogan} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
-                    <FormTags name={tableKeys.Tags.name} column="Tags" value={item.Tags} optionWords={dramaTags} />
+                    <FormTags name={tableKeys.Tags.name} column="Tags" value={item.Tags} loadOptions={dramaTags} />
                     <FormInput name={tableKeys.ChatperCount.name} column="ChatperCount" value={item.ChatperCount} type="number" />
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" step="0.1" />
                     <FormInput name={tableKeys.Like.name} column="Like" value={item.Like} type="number" />
@@ -173,7 +162,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={dramaUpdate}>保存更新</Button>
         </form>
     )
 }

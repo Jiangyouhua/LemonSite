@@ -43,7 +43,7 @@ export default function CategoryPage() {
     }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.categoryAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.categoryAll.get({limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -57,7 +57,6 @@ export default function CategoryPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_category) => {
@@ -84,7 +83,7 @@ export default function CategoryPage() {
                 addItem={addItem}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -100,7 +99,7 @@ export default function CategoryPage() {
 
 export function ProfileForm({ item, saved }) {
     const categoryUpdate = (event) => {
-        API.categoryUpdate.submit(event).then((result) => {
+        API.categoryUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -112,9 +111,9 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={categoryUpdate} >
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  >
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormImage name={tableKeys.IconURL.name} column="IconURL" value={item.IconURL} count={1} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
@@ -123,7 +122,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit"  onClick={categoryUpdate}>保存更新</Button>
         </form>
     )
 }

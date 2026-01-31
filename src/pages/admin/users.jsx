@@ -52,7 +52,7 @@ export default function UsersPage() {
     const [, setNavs] = useLocalStorage("navs", [])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.userAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.userAll.get({limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -66,7 +66,6 @@ export default function UsersPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_user) => {
@@ -108,7 +107,7 @@ export default function UsersPage() {
                 addItem={addItem}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -125,7 +124,7 @@ export default function UsersPage() {
 export function ProfileForm({ item, saved, edit }) {
     const [user, setUser] = useLocalStorage("user")
     const userUpdate = (event) => {
-        API.userUpdate.submit(event).then((result) => {
+        API.userUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 if (result.Data.ID === user.ID) {
                     let u = user
@@ -147,9 +146,9 @@ export function ProfileForm({ item, saved, edit }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={userUpdate} aria-disabled={!edit}>
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  aria-disabled={!edit}>
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormImage name={tableKeys.AvatarURL.name} column="AvatarURL" value={item.AvatarURL} count={1} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} block={true} />
@@ -166,7 +165,7 @@ export function ProfileForm({ item, saved, edit }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={StatusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={userUpdate}>保存更新</Button>
         </form>
     )
 }

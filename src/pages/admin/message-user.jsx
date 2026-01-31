@@ -51,7 +51,7 @@ export default function MessageUserPage() {
     }
 
     const loadData = (offset, limit, key, value, back) => {
-        API.messageToUser.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.messageToUser.get({limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -65,7 +65,6 @@ export default function MessageUserPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_message) => {
@@ -83,7 +82,7 @@ export default function MessageUserPage() {
                 addItem={addItem}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -99,7 +98,7 @@ export default function MessageUserPage() {
 
 export function ProfileForm({ item, saved }) {
     const messageUpdate = (event) => {
-        API.messageUpdate.submit(event).then((result) => {
+        API.messageUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -111,16 +110,16 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={messageUpdate} >
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  >
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormSelect name={tableKeys.Group.name} column="Group" value={item.Group} options={groupTags} />
                     <FormInput name={tableKeys.Content.name} column="Content" value={item.Content} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={messageUpdate}>保存更新</Button>
         </form>
     )
 }

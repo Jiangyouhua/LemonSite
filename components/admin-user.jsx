@@ -1,7 +1,5 @@
 
 import {
-    BadgeCheck,
-    Bell,
     ChevronsUpDown,
     LogOut,
 } from "lucide-react"
@@ -41,11 +39,8 @@ export default function AdminUser() {
             <SidebarMenuItem>
                 <DropdownMenu>
                     <DropdownMenuTrigger >
-                        <SidebarMenuButton
-                            size="lg"
-                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                        >
-                            <Avatar className="h-8 w-8 rounded-lg">
+                        <span className="flex p-2">
+                            <Avatar className="h-8 w-8 rounded-lg mr-2">
                                 <AvatarImage src={user.AvatarURL} alt={user.Name} />
                                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                             </Avatar>
@@ -54,7 +49,7 @@ export default function AdminUser() {
                                 <span className="truncate text-xs">{user.Email}</span>
                             </div>
                             <ChevronsUpDown className="ml-auto size-4" />
-                        </SidebarMenuButton>
+                        </span>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"

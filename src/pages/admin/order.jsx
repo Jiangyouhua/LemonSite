@@ -46,7 +46,7 @@ export default function OrderPage() {
     }, [setNavs])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.orderAll.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.orderAll.get({limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -60,7 +60,6 @@ export default function OrderPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_order) => {
@@ -77,7 +76,7 @@ export default function OrderPage() {
                 actions={[{ name: "编辑内容", func: editDetail }]}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -93,7 +92,7 @@ export default function OrderPage() {
 
 export function ProfileForm({ item, saved }) {
     const orderUpdate = (event) => {
-        API.orderUpdate.submit(event).then((result) => {
+        API.orderUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -105,9 +104,9 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={orderUpdate} >
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  >
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} block={true} />
                     <FormInput name={tableKeys.Quantity.name} column="Quantity" value={item.Quantity} type="number" block={true} />
@@ -117,7 +116,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={orderUpdate}>保存更新</Button>
         </form>
     )
 }

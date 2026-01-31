@@ -38,7 +38,7 @@ export default function AddressPage() {
     const [, setNavs] = useLocalStorage("navs", [])
 
     const loadData = (offset, limit, key, value, back) => {
-        API.addressUser.get({ limit: limit, offset: offset, key: key, value: value }).then((result) => {
+        API.addressUser.get({ limit, offset, key, value }).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -52,7 +52,6 @@ export default function AddressPage() {
 
     const finishSave = () => {
         setLoaded(false)
-        setOpen(false)
     }
 
     const editDetail = (_address) => {
@@ -87,7 +86,7 @@ export default function AddressPage() {
                 addItem={addItem}
             />
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger >
+                <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
@@ -103,7 +102,7 @@ export default function AddressPage() {
 
 export function ProfileForm({ item, saved, edit }) {
     const addressUpdate = (event) => {
-        API.addressUpdate.submit(event).then((result) => {
+        API.addressUpdate.submit(event.target.parentElement).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -115,9 +114,9 @@ export function ProfileForm({ item, saved, edit }) {
     }
 
     return (
-        <form className="grid items-start gap-6" onSubmit={addressUpdate} aria-disabled={!edit}>
-            <ScrollArea className="w-auto, h-140 m-[-12px] p-[12px]">
-                <div className="px-[4px] ">
+        <form className="grid items-start gap-6"  aria-disabled={!edit}>
+            <ScrollArea className="h-140 m-[-12px] p-[12px]">
+                <div >
                     <input type="hidden" name="ID" value={item.ID} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Phone.name} column="Phone" value={item.Phone} />
@@ -129,7 +128,7 @@ export function ProfileForm({ item, saved, edit }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit">保存更新</Button>
+            <Button type="submit" onClick={addressUpdate}>保存更新</Button>
         </form>
     )
 }
