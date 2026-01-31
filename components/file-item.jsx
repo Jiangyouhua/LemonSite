@@ -38,7 +38,7 @@ export function FileItem({
               variant="ghost"
               size="sm"
               className="h-8 w-8 bg-transparent! hover:text-red-500"
-              onClick={() => onRemove(file.name)}
+              onClick={(e) => {e.preventDefault(); onRemove(file)} }
             >
               <Trash2 className="h-4 w-4" />
             </Button>

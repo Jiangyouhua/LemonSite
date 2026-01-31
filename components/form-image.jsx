@@ -50,11 +50,11 @@ export default function FormImage({ column, name, count, value, block }) {
         handleFileSelect(e.dataTransfer.files);
     };
 
-    const removeFile = (filename) => {
-        setSelectedFiles((prev) => prev.filter((file) => file.name !== filename));
+    const removeFile = (file) => {
+        setSelectedFiles((prev) => prev.filter((f) => !file.localFile ? f.requestURL !== file.requestURL : f.localFile.name !== file.localFile.name));
         setFileProgresses((prev) => {
             const newProgresses = { ...prev };
-            delete newProgresses[filename];
+            delete newProgresses[!file.localFile ? file.requestURL : file.localFile.name];
             return newProgresses;
         });
     };
@@ -102,12 +102,12 @@ export default function FormImage({ column, name, count, value, block }) {
                     removeFile={removeFile}
                     disabled = {disabled}
                 />
-                {selectedFiles.filter(file => !!file.uploadURL).map((file, index) => {
+                {selectedFiles.filter(file => !!file.requestURL).map((file, index) => {
                     return (<Input key={"image_" + column + "_" + index} type='hidden' id={column} name={count > 1 ?  `${column}.${index}` : column } disabled={disabled} defaultValue={file.requestURL} />)
                 })}
             </div>
             <div className="text-right  ">
-                {disabled || block || selectedFiles.length == 0 ? <></> : <Button disabled={selectedFiles.filter(file => !file.status).length === 0} onClick={uploadFile}>可上传 {count} 张图片</Button>}
+                {disabled || block || selectedFiles.length == 0 ? <></> : <Button disabled={selectedFiles.filter(file => !file.status).length === 0} onClick={uploadFile}>共可选 {count} 张图片</Button>}
             </div>
         </div>
     )

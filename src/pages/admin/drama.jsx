@@ -23,7 +23,6 @@ import CellImage from "@/components/cell-image"
 const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     Name: Seer("", "名称", true),
     Author: Seer("", "作者", true),
     Publisher: Seer("", "出版社", true),
@@ -109,16 +108,16 @@ export default function DramaPage() {
                         <DialogTitle>{!drama || drama.ID === 0 ? "新添内容" : "编辑内容，ID：" + drama.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={drama} saved={finishSave} />
+                    <ProfileForm data={drama} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
     const dramaUpdate = (event) => {
-        API.dramaUpdate.submit(event.target.parentElement).then((result) => {
+        API.dramaUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -140,7 +139,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={dramaUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -162,7 +161,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={dramaUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

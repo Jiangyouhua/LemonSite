@@ -20,7 +20,6 @@ import FormSelect from "@/components/form-select"
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     Name: Seer("", "收件人", true),
     Bank: Seer("", "银行", true),
     Branch: Seer("", "分行", true),
@@ -90,16 +89,16 @@ export default function BankPage() {
                         <DialogTitle>{!bank || bank.ID === 0 ? "新添内容" : "编辑内容，ID：" + bank.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={bank} saved={finishSave} />
+                    <ProfileForm data={bank} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved, edit }) {
+function ProfileForm({ data, saved, edit }) {
     const bankUpdate = (event) => {
-        API.bankUpdate.submit(event.target.parentElement).then((result) => {
+        API.bankUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -111,7 +110,7 @@ export function ProfileForm({ item, saved, edit }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  aria-disabled={!edit}>
+        <form onSubmit={bankUpdate} className="grid items-start gap-6"  aria-disabled={!edit}>
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -122,7 +121,7 @@ export function ProfileForm({ item, saved, edit }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={bankUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

@@ -21,7 +21,6 @@ const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => 
 const repeatTags = ['未设置', '日', '周', '月', '年'].map((item, index) => { return { ID: index, Name: item } })
 const kindTags = ["未设置", "积分", "现金"].map((item, index) => { return { ID: index, Name: item } })
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     Category: Seer("", "种类", true, (v) => v.Name),
     Name: Seer("", "名称", true),
     Description: Seer("", "描述", true),
@@ -29,7 +28,7 @@ const tableKeys = {
     EndTime: Seer(0, "开始时间", true, (v) => v + ":00"),
     Kind: Seer("", "获利类型", true, (v) => kindTags[v].Name),
     Score: Seer(0, "积分", true),
-    Money: Seer(0, "现金", true),
+    Money: Seer(0, "现金", true, (v) => (v / 100).toLocaleString("zh-CN", {style: "currency", currency: "CNY", minimumFractionDigits: 2, maximumFractionDigits: 2})),
     Repeat: Seer("", "重复", true, (v) => repeatTags[v].Name),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
@@ -95,20 +94,22 @@ export default function CardPage() {
                         <DialogTitle>{!card || card.ID === 0 ? "新添内容" : "编辑内容，ID：" + card.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={card} saved={finishSave} />
+                    <ProfileForm data={card} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const [loaded, setLoaded] = useState(false)
     const [categories, setCategories] = useState([])
     const cardUpdate = (event) => {
-        API.cardUpdate.submit(event.target.parentElement).then((result) => {
+        API.cardUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -131,7 +132,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={cardUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -142,12 +143,12 @@ export function ProfileForm({ item, saved }) {
                     <FormInput type="number" name={tableKeys.EndTime.name} column="EndTime" value={item.EndTime} />
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
                     <FormInput type="number" name={tableKeys.Score.name} column="Score" value={item.Score} />
-                    <FormInput type="number" name={tableKeys.Money.name} column="Money" value={item.Money} />
+                    <FormInput type="number" name={tableKeys.Money.name + "（单位：分）"} column="Money" value={item.Money} />
                     <FormSelect name={tableKeys.Repeat.name} column="Repeat" value={item.Repeat} options={repeatTags} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={cardUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

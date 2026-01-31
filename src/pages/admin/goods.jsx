@@ -24,7 +24,6 @@ const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((it
 const kindTags = ['未设置', '积分', '价格'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     ImageURL: Seer([], "产品图片", true, (v) => <CellImage url={!v || v.length < 1 ? "" : v[0]} />),
     Name: Seer("", "名称", true),
     Slogan: Seer("", "广告语", true),
@@ -34,7 +33,7 @@ const tableKeys = {
     Kind: Seer("", "类型", true, (v) => kindTags[v].Name),
     Score: Seer(0, "积分", true),
     ScoreExplanation: Seer("", "积分说明", true),
-    Price: Seer(0, "价格", true),
+    Price: Seer(0, "价格", true, (v) => (v / 100).toLocaleString("zh-CN", {style: "currency", currency: "CNY", minimumFractionDigits: 2, maximumFractionDigits: 2})),
     PriceExplanation: Seer("", "价格说明", true),
     Inventory: Seer("", "库存", true),
     IntroduceURL: Seer([], "推广图片", true, (v) => <CellImage url={!v || v.length < 1 ? "" : v[0]} />),
@@ -68,6 +67,7 @@ export default function GoodsPage() {
     }
 
     const finishSave = () => {
+        toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -102,19 +102,20 @@ export default function GoodsPage() {
                         <DialogTitle>{!goods || goods.ID === 0 ? "新添内容" : "编辑内容，ID：" + goods.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={goods} saved={finishSave} />
+                    <ProfileForm data={goods} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
-
+function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const goodsUpdate = (event) => {
-        API.goodsUpdate.submit(event.target.parentElement).then((result) => {
+        API.goodsUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -126,7 +127,7 @@ export function ProfileForm({ item, saved }) {
     const goodsPromotional = (back) => {
         API.goodsPromotional.get().then((result) => {
             if (result.Succeed) {
-                back(result.Data)
+                back()
             } else {
                 toast.error(result.Message)
             }
@@ -144,12 +145,12 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6" id="form" >
+        <form onSubmit={goodsUpdate} className="grid items-start gap-6" id="form" >
             <ScrollArea className="h-140 m-[-16px] p-[16px]">
                 <div>
                     <input type="hidden" name="ID" value={item.ID} />
-                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} count={10} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
+                    <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} count={10} />
                     <FormInput name={tableKeys.Slogan.name} column="Slogan" value={item.Slogan} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
                     <FormTags name={tableKeys.Tags.name} column="Tags" value={item.Tags} loadOptions={goodsTags} />
@@ -157,14 +158,14 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" />
                     <FormInput name={tableKeys.ScoreExplanation.name} column="ScoreExplanation" value={item.ScoreExplanation} />
-                    <FormInput name={tableKeys.Price.name} column="Price" value={item.Price} type="number" />
+                    <FormInput name={tableKeys.Price.name + "（单位：分）"} column="Price" value={item.Price} type="number" />
                     <FormInput name={tableKeys.PriceExplanation.name} column="PriceExplanation" value={item.PriceExplanation} />
                     <FormInput name={tableKeys.Inventory.name} column="Inventory" value={item.Inventory} type="number" />
                     <FormImage name={tableKeys.IntroduceURL.name} column="IntroduceURL" value={item.IntroduceURL} count={20} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={goodsUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

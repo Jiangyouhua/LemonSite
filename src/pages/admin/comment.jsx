@@ -20,7 +20,6 @@ import FormSelect from "@/components/form-select"
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     User: Seer(0, "用户", true, (v) => v.Name),
     Drama: Seer(0, "剧集", true, (v) => v.Name),
     Content: Seer("", "反馈内容", true),
@@ -79,16 +78,16 @@ export default function CommentPage() {
                         <DialogTitle>{!comment || comment.ID === 0 ? "新添内容" : "编辑内容，ID：" + comment.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={comment} saved={finishSave} />
+                    <ProfileForm data={comment} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
     const commentUpdate = (event) => {
-        API.commentUpdate.submit(event.target.parentElement).then((result) => {
+        API.commentUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -100,7 +99,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={commentUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -109,7 +108,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={commentUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

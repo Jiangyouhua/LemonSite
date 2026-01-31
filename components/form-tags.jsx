@@ -36,7 +36,9 @@ export default function FromTags({ name, value, column, loadOptions, block }) {
     }
 
     const addTag = (text) => {
-        removeTag(text)
+        if (tags.includes(text)) {
+            return
+        }
         setTags((prev) => [...prev, text])
     }
 
@@ -68,7 +70,7 @@ export default function FromTags({ name, value, column, loadOptions, block }) {
                                         {disabled || block ? <></> :
                                             <>
                                                 &nbsp;&nbsp;
-                                                <input type="button" className="text-sm" onClick={(e) => { e.preventDefault; removeTag(text) }} value="✕" />
+                                                <input type="button" className="text-sm" onClick={(e) => { e.preventDefault(); removeTag(text) }} value="✕" />
                                             </>
                                         }
                                     </span>
@@ -84,7 +86,7 @@ export default function FromTags({ name, value, column, loadOptions, block }) {
                 <></> 
                 :
                 <div className="border rounded-md text-sm">
-                    <Input className="border-0 shadow-none input-tag" type="text" onKeyUp={inputKeyUp} placeholder="输入后，回车添加……" onChange={(e) => { e.preventDefault; setWord(e.target.value) }} defaultValue={word} />
+                    <Input className="border-0 shadow-none input-tag" type="text" onKeyUp={inputKeyUp} placeholder="输入后，回车添加……" onChange={(e) => { e.preventDefault(); setWord(e.target.value) }} defaultValue={word} />
                     <div className="mx-2">
                         <Separator />
                         <div className="my-2">
@@ -92,7 +94,7 @@ export default function FromTags({ name, value, column, loadOptions, block }) {
                                 options.filter(w => !tags.includes(w) && (!word || w.includes(word))).map((text, index) => {
                                     return (
                                         <span key={"option_tag_" + index}>
-                                            <Input className='w-fit' type="button" value={text} onClick={(e) => { e.preventDefault; addTag(text) }} />
+                                            <Input className='w-fit' type="button" value={text} onClick={(e) => { e.preventDefault(); addTag(text) }} />
                                             &nbsp;
                                         </span>
                                     )

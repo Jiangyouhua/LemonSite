@@ -21,7 +21,6 @@ const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => 
 const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     User: Seer(0, "用户", true, (v) => v.Name),
     Group: Seer(0, "用户组", true, (v) => groupTags[v].Name),
     Content: Seer("", "金额", true),
@@ -79,16 +78,16 @@ export default function MessageSystemPage() {
                         <DialogTitle>{!message || message.ID === 0 ? "新添内容" : "编辑内容，ID：" + message.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={message} saved={finishSave} />
+                    <ProfileForm data={message} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
     const messageUpdate = (event) => {
-        API.messageUpdate.submit(event.target.parentElement).then((result) => {
+        API.messageUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -100,7 +99,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={messageUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -108,7 +107,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={messageUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

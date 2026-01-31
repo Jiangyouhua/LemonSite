@@ -12,7 +12,7 @@ export default function LoginPage() {
 
     const handleSubmit = (event) => {
         event.preventDefault()
-        API.login.submit(event.target.parentElement)
+        API.login.submit(event)
             .then((result) => {
                 if (result.Succeed) {
                     const data = result.Data

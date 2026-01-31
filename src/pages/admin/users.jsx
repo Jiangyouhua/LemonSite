@@ -23,7 +23,6 @@ import { StatusTags } from "@/lib/data"
 const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     AvatarURL: Seer("", "头像", true, (v) => <CellAvatar url={v} />),
     Name: Seer("", "姓名", true),
     RealName: Seer("", "真实姓名", true),
@@ -114,17 +113,18 @@ export default function UsersPage() {
                         <DialogTitle>{!user || user.ID === 0 ? "新添内容" : "编辑内容，ID：" + user.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={user} saved={finishSave} />
+                    <ProfileForm data={user} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved, edit }) {
+function ProfileForm({ data, saved, edit }) {
+    const [item, setItem] = useState(data)
     const [user, setUser] = useLocalStorage("user")
     const userUpdate = (event) => {
-        API.userUpdate.submit(event.target.parentElement).then((result) => {
+        API.userUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 if (result.Data.ID === user.ID) {
                     let u = user
@@ -137,6 +137,7 @@ export function ProfileForm({ item, saved, edit }) {
                     setUser(u)
                 }
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据数据更新失败，请稍后再试")
             }
@@ -146,7 +147,7 @@ export function ProfileForm({ item, saved, edit }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  aria-disabled={!edit}>
+        <form onSubmit={userUpdate} className="grid items-start gap-6"  aria-disabled={!edit}>
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -165,7 +166,7 @@ export function ProfileForm({ item, saved, edit }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={StatusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={userUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

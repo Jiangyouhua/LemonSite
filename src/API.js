@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'sonner';
 const baseUrl = '/api/v1'
 
 export const urlParams = new URLSearchParams(window.location.search);
@@ -61,18 +62,23 @@ String.prototype.request = function (method, data = undefined) {
         .catch(err => { throw err })
 };
 
-String.prototype.submit = function (target) {
-    const formData = new FormData(target)
+String.prototype.submit = function (event) {
+    event.preventDefault()
+    const formData = new FormData(event.target)
+    if (formData.keys() === 1){
+        toast.error("没有新的数据")
+        return 
+    }
     let data = {};
     formData.forEach((value, key) => {
         let arr = key.split(".")
         if (arr.length == 1) {
             data[key] = key == "ID" ? +value : value
-            return
+        } else {
+            data[arr[0]] = [...(data[arr[0]] ?? []), value]
         }
-        data[arr[0]] = [...(data[arr[0]] ?? []), value]
     })
-    const inputs = target.querySelectorAll("input[type='number']:enabled")
+    const inputs = event.target.querySelectorAll("input[type='number']:enabled")
 
     inputs.forEach(element => {
         data[element.getAttribute("name")] = +element.value

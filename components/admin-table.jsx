@@ -163,7 +163,7 @@ export function BodyTabler({ rows, columns, dict, actions }) {
         <TableBody>
             {rows.map((row, index) => (
                 <TableRow key={"row_" + index} onClick={(e) => e.preventDefault}>
-                    <TableCell key={"row_index_" + index} className="text-center"> {index} </TableCell>
+                    <TableCell key={"row_index_" + index} className="text-center"> {index + 1} </TableCell>
                     {columns.map((column) => (
                         <TableCell key={'row_' + column.name + "_" + index} className={(column.checked ? 'visible' : 'hidden') + " max-w-24 overflow-ellipsis overflow-hidden whitespace-nowrap"}>
                             {dict[column.name].cell ? dict[column.name].cell(row[column.name]) : row[column.name]}

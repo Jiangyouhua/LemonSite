@@ -21,7 +21,6 @@ import CellAvatar from "@/components/cell-avatar"
 
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     Name: Seer("", "名称", true),
     Description: Seer("", "说明", true),
     ImageURL: Seer("", "页面图", true, (v) => <CellAvatar url={v} />),
@@ -90,16 +89,16 @@ export default function CategoryPage() {
                         <DialogTitle>{!category || category.ID === 0 ? "新添内容" : "编辑内容，ID：" + category.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={category} saved={finishSave} />
+                    <ProfileForm data={category} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
     const categoryUpdate = (event) => {
-        API.categoryUpdate.submit(event.target.parentElement).then((result) => {
+        API.categoryUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -111,7 +110,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={categoryUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -122,7 +121,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit"  onClick={categoryUpdate}>保存更新</Button>
+            <Button type="submit"  >保存更新</Button>
         </form>
     )
 }

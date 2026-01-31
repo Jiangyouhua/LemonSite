@@ -20,7 +20,6 @@ import FormSelect from "@/components/form-select"
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     Name: Seer("", "收件人", true),
     Phone: Seer("", "联系电话", true),
     Province: Seer("", "省（自冶区）", true),
@@ -93,18 +92,20 @@ export default function AddressPage() {
                         <DialogTitle>{!address || address.ID === 0 ? "新添内容" : "编辑内容，ID：" + address.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={address} saved={finishSave} />
+                    <ProfileForm data={address} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved, edit }) {
+function ProfileForm({ data, saved, edit }) {
+    const [item, setItem] = useState(data)
     const addressUpdate = (event) => {
-        API.addressUpdate.submit(event.target.parentElement).then((result) => {
+        API.addressUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -114,7 +115,7 @@ export function ProfileForm({ item, saved, edit }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  aria-disabled={!edit}>
+        <form onSubmit={addressUpdate}  className="grid items-start gap-6"  aria-disabled={!edit}>
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -128,7 +129,7 @@ export function ProfileForm({ item, saved, edit }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={addressUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

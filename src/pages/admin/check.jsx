@@ -20,7 +20,6 @@ import FormSelect from "@/components/form-select"
 const statusTags = ['未设置', "未完成", "已完成"].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     UserID: Seer(0, "用户ID"),
     CardID: Seer(0, "打卡ID"),
     Score: Seer(0, "积分", true),
@@ -79,16 +78,16 @@ export default function CheckPage() {
                         <DialogTitle>{!check || check.ID === 0 ? "新添内容" : "编辑内容，ID：" + check.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={check} saved={finishSave} />
+                    <ProfileForm data={check} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
     const checkUpdate = (event) => {
-        API.checkUpdate.submit(event.target.parentElement).then((result) => {
+        API.checkUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -100,7 +99,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={checkUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -109,7 +108,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={checkUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

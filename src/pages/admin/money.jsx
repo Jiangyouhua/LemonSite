@@ -20,10 +20,9 @@ import FormSelect from "@/components/form-select"
 const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     UserID: Seer(0, "用户ID"),
     BankID: Seer(0, "银行ID"),
-    Amonut: Seer(0, "金额", true),
+    Amonut: Seer(0, "金额", true, (v) => (v / 100).toLocaleString("zh-CN", {style: "currency", currency: "CNY", minimumFractionDigits: 2, maximumFractionDigits: 2})),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -78,18 +77,20 @@ export default function MoneyPage({ kind, name, url }) {
                         <DialogTitle>{!money || money.ID === 0 ? "新添内容" : "编辑内容，ID：" + money.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={money} saved={finishSave} />
+                    <ProfileForm data={money} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const moneyUpdate = (event) => {
-        API.moneyUpdate.submit(event.target.parentElement).then((result) => {
+        API.moneyUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -99,15 +100,15 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={moneyUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
-                    <FormInput name={tableKeys.Amonut.name} column="Amonut" value={item.Amonut} block={true} />
+                    <FormInput name={tableKeys.Amonut.name + "（单位：分）"} column="Amonut" value={item.Amonut} block={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={moneyUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

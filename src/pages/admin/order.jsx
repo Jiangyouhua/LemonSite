@@ -21,7 +21,6 @@ const statusTags = ['未设置', "待付款", "待发货", "待收货", "取消"
 const kindTags = ['未设置', "兑换", "购买"].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     UserID: Seer(0, "用户ID"),
     GoodsID: Seer(0, "商品ID"),
     Kind: Seer(0, "支付方式", true),
@@ -83,18 +82,20 @@ export default function OrderPage() {
                         <DialogTitle>{!order || order.ID === 0 ? "新添内容" : "编辑内容，ID：" + order.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={order} saved={finishSave} />
+                    <ProfileForm data={order} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const orderUpdate = (event) => {
-        API.orderUpdate.submit(event.target.parentElement).then((result) => {
+        API.orderUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -104,7 +105,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={orderUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -116,7 +117,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={orderUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }

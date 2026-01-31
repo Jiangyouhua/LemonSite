@@ -20,7 +20,6 @@ import FormSelect from "@/components/form-select"
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
-    ID: Seer(0, "ID", true),
     UserID: Seer(0, "用户ID"),
     Content: Seer("", "反馈内容", true),
     Reply: Seer("", "回复内容", true),
@@ -78,16 +77,16 @@ export default function FeedbackPage() {
                         <DialogTitle>{!feedback || feedback.ID === 0 ? "新添内容" : "编辑内容，ID：" + feedback.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm item={feedback} saved={finishSave} />
+                    <ProfileForm data={feedback} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-export function ProfileForm({ item, saved }) {
+function ProfileForm({ data, saved }) {
     const feedbackUpdate = (event) => {
-        API.feedbackUpdate.submit(event.target.parentElement).then((result) => {
+        API.feedbackUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
             } else {
@@ -99,7 +98,7 @@ export function ProfileForm({ item, saved }) {
     }
 
     return (
-        <form className="grid items-start gap-6"  >
+        <form onSubmit={feedbackUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
@@ -108,7 +107,7 @@ export function ProfileForm({ item, saved }) {
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
-            <Button type="submit" onClick={feedbackUpdate}>保存更新</Button>
+            <Button type="submit" >保存更新</Button>
         </form>
     )
 }
