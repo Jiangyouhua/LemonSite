@@ -14,6 +14,7 @@ import CardPage from './pages/admin/card'
 import BankPage from './pages/admin/bank'
 import OrderPage from './pages/admin/order'
 import CheckPage from './pages/admin/check'
+import CarePage from './pages/admin/care'
 import FeedbackPage from './pages/admin/feedback'
 import CategoryPage from './pages/admin/category'
 import DramaPage from './pages/admin/drama'
@@ -48,6 +49,7 @@ function App() {
             <Route path='address' element={<AddressPage />} />
             <Route path='bank' element={<BankPage />} />
             <Route path='card' element={<CardPage />} />
+            <Route path='care' element={<CarePage />} />
             <Route path='category' element={<CategoryPage />} />
             <Route path='chapter' element={<ChapterPage />} />
             <Route path='check' element={<CheckPage />} />

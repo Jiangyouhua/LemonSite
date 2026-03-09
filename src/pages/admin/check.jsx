@@ -17,13 +17,14 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
-const statusTags = ['未设置', "未完成", "已完成"].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', "未完成", "已完成"].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
-    UserID: Seer(0, "用户ID"),
-    CardID: Seer(0, "打卡ID"),
+    User: Seer(0, "用户", true, (v) => v.Name),
+    Card: Seer(0, "打卡", true, (v) => v.Name),
     Score: Seer(0, "积分", true),
     Money: Seer(0, "奖金", true),
+    CreatedAt: Seer(0, "打卡时间", true),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -54,6 +55,7 @@ export default function CheckPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -75,7 +77,7 @@ export default function CheckPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!check || check.ID === 0 ? "新添内容" : "编辑内容，ID：" + check.ID}</DialogTitle>
+                        <DialogTitle>{!check || !check.ID ? "新添内容" : "编辑内容，ID：" + check.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={check} saved={finishSave} />
@@ -86,10 +88,12 @@ export default function CheckPage() {
 }
 
 function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const checkUpdate = (event) => {
         API.checkUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -103,6 +107,8 @@ function ProfileForm({ data, saved }) {
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
+                    <FormInput name={tableKeys.User.name} column="User" value={item.User} type="text" block={true} />
+                    <FormInput name={tableKeys.Card.name} column="Card" value={item.Card} type="text" block={true} />
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" block={true} />
                     <FormInput name={tableKeys.Money.name} column="Money" value={item.Money} type="number" block={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />

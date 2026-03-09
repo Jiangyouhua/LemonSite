@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Pen, Lock, Shield } from "lucide-react"
+import { Pen, Lock, PencilLine } from "lucide-react"
 import { Resource } from "@/lib/resource"
 import { FileDropzone } from "@/components/file-dropzone";
 import { FileList } from "@/components/file-list";
@@ -82,7 +82,7 @@ export default function FormImage({ column, name, count, value, block }) {
         <div className="grid gap-0">
             <Label >
                 <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
-                    {disabled ? (!block ? <Lock /> : <Shield />) : <Pen />}
+                    {disabled ? (!block ? <Pen /> : <Lock />) : <PencilLine />}
                 </Button>
                 {name}:
             </Label>

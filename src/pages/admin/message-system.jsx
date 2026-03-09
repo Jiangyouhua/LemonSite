@@ -17,8 +17,8 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
-const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { ID: index, Name: item } })
-const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { Value: index, Name: item } })
+const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
     User: Seer(0, "用户", true, (v) => v.Name),
@@ -54,6 +54,7 @@ export default function MessageSystemPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -75,7 +76,7 @@ export default function MessageSystemPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!message || message.ID === 0 ? "新添内容" : "编辑内容，ID：" + message.ID}</DialogTitle>
+                        <DialogTitle>{!message || !message.ID ? "新添内容" : "编辑内容，ID：" + message.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={message} saved={finishSave} />
@@ -86,10 +87,12 @@ export default function MessageSystemPage() {
 }
 
 function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const messageUpdate = (event) => {
         API.messageUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }

@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Pen, Lock } from "lucide-react"
+import { Pen, Lock, PencilLine } from "lucide-react"
 import { useState } from "react"
 import { Resource } from "@/lib/resource"
 
-export default function FormAvatar({ column, name, value }) {
+export default function FormAvatar({ column, name, value, block }) {
     const [disabled, setDisabled] = useState(true)
     const [url, setUrl] = useState(value)
 
@@ -34,8 +34,8 @@ export default function FormAvatar({ column, name, value }) {
         <div className='flex' >
             <div className="grow"></div>
             <div className="relative size-30 text-left">
-                <Button className="absolute z-10 rounded-full" variant="default" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!disabled) }}  >
-                    {disabled ? <Lock /> : <Pen />}
+                <Button className="absolute z-10 rounded-full" variant="default" size="icon" onClick={(event) => { event.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
+                    {disabled ? (!block ? <Pen /> : <Lock />) : <PencilLine />}
                 </Button>
                 <div>
                     <AlertDialog>

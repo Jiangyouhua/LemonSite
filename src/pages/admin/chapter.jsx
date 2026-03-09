@@ -17,13 +17,12 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
-const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
-    User: Seer(0, "用户", true, (v) => v.Name),
-    Drama: Seer(0, "剧集", true, (v) => v.Name),
-    Content: Seer("", "反馈内容", true),
-    ReplyTo: Seer("", "回复的ID", true),
+    Name: Seer("", "剧集名称", true),
+    Number: Seer(0, "章节编号", true),
+    ContentURL: Seer("", "内容地址", true),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -55,6 +54,7 @@ export default function ChapterPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -64,7 +64,7 @@ export default function ChapterPage() {
     }
 
     const addItem = () => {
-        let _chapter = {}
+        let _chapter = { DramaID: urlParams.get("drama_id") }
         Object.entries(tableKeys).forEach(([k, v]) => {
             _chapter[k] = v.value
         })
@@ -86,7 +86,7 @@ export default function ChapterPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!chapter || chapter.ID === 0 ? "新添内容" : "编辑内容，ID：" + chapter.ID}</DialogTitle>
+                        <DialogTitle>{!chapter || !chapter.ID ? "新添内容" : "编辑内容，ID：" + chapter.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={chapter} saved={finishSave} />
@@ -97,10 +97,12 @@ export default function ChapterPage() {
 }
 
 function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const chapterUpdate = (event) => {
         API.chapterUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -114,8 +116,10 @@ function ProfileForm({ data, saved }) {
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
-                    <FormInput name={tableKeys.Content.name} column="Content" value={item.Content} />
-                    <FormInput name={tableKeys.ReplyTo.name} column="ReplyTo" value={item.ReplyTo} />
+                    <input type="hidden" name="DramaID" value={item.DramaID} />
+                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
+                    <FormInput name={tableKeys.Number.name} column="Number" value={item.Number} type="number" />
+                    <FormInput name={tableKeys.ContentURL.name} column="ContentURL" value={item.ContentURL} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

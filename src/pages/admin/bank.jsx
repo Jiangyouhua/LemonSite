@@ -17,7 +17,7 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
-const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
     Name: Seer("", "收件人", true),
@@ -55,6 +55,7 @@ export default function BankPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -86,7 +87,7 @@ export default function BankPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!bank || bank.ID === 0 ? "新添内容" : "编辑内容，ID：" + bank.ID}</DialogTitle>
+                        <DialogTitle>{!bank || !bank.ID ? "新添内容" : "编辑内容，ID：" + bank.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={bank} saved={finishSave} />
@@ -97,10 +98,12 @@ export default function BankPage() {
 }
 
 function ProfileForm({ data, saved, edit }) {
+    const [item, setItem] = useState(data)
     const bankUpdate = (event) => {
         API.bankUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -114,6 +117,7 @@ function ProfileForm({ data, saved, edit }) {
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
+                    <input type="hidden" name="UserID" value={item.UserID} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Bank.name} column="Bank" value={item.Bank} />
                     <FormInput name={tableKeys.Branch.name} column="Branch" value={item.Branch} />

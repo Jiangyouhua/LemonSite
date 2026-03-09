@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Pen, Lock, Shield } from "lucide-react"
+import { Pen, Lock, PencilLine } from "lucide-react"
 import { toast } from "sonner";
 
 
@@ -53,7 +53,7 @@ export default function FromTags({ name, value, column, loadOptions, block }) {
         <div>
             <Label>
                 <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); setDisabled(!block ? !disabled : true) }}  >
-                    { disabled ? (!block ? <Lock /> : <Shield />) : <Pen /> }
+                    {disabled ? (!block ? <Pen /> : <Lock />) : <PencilLine />}
                 </Button>
                 {name}:
             </Label>
@@ -91,7 +91,7 @@ export default function FromTags({ name, value, column, loadOptions, block }) {
                         <Separator />
                         <div className="my-2">
                             {
-                                options.filter(w => !tags.includes(w) && (!word || w.includes(word))).map((text, index) => {
+                                (options ?? []).filter(w => !tags.includes(w) && (!word || w.includes(word))).map((text, index) => {
                                     return (
                                         <span key={"option_tag_" + index}>
                                             <Input className='w-fit' type="button" value={text} onClick={(e) => { e.preventDefault(); addTag(text) }} />

@@ -20,8 +20,8 @@ import FormSelect from "@/components/form-select"
 import FormTags from "@/components/form-tags"
 import FormImage from "@/components/form-image"
 
-const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => { return { ID: index, Name: item } })
-const kindTags = ['未设置', '积分', '价格'].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => { return { Value: index, Name: item } })
+const kindTags = ['未设置', '积分', '价格'].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
     ImageURL: Seer([], "产品图片", true, (v) => <CellImage url={!v || v.length < 1 ? "" : v[0]} />),
@@ -33,8 +33,8 @@ const tableKeys = {
     Kind: Seer("", "类型", true, (v) => kindTags[v].Name),
     Score: Seer(0, "积分", true),
     ScoreExplanation: Seer("", "积分说明", true),
-    Price: Seer(0, "价格", true, (v) => (v / 100).toLocaleString("zh-CN", {style: "currency", currency: "CNY", minimumFractionDigits: 2, maximumFractionDigits: 2})),
-    PriceExplanation: Seer("", "价格说明", true),
+    Money: Seer(0, "价格", true, (v) => (v / 100).toLocaleString("zh-CN", {style: "currency", currency: "CNY", minimumFractionDigits: 2, maximumFractionDigits: 2})),
+    MoneyExplanation: Seer("", "价格说明", true),
     Inventory: Seer("", "库存", true),
     IntroduceURL: Seer([], "推广图片", true, (v) => <CellImage url={!v || v.length < 1 ? "" : v[0]} />),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
@@ -99,7 +99,7 @@ export default function GoodsPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!goods || goods.ID === 0 ? "新添内容" : "编辑内容，ID：" + goods.ID}</DialogTitle>
+                        <DialogTitle>{!goods || !goods.ID ? "新添内容" : "编辑内容，ID：" + goods.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={goods} saved={finishSave} />
@@ -158,8 +158,8 @@ function ProfileForm({ data, saved }) {
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" />
                     <FormInput name={tableKeys.ScoreExplanation.name} column="ScoreExplanation" value={item.ScoreExplanation} />
-                    <FormInput name={tableKeys.Price.name + "（单位：分）"} column="Price" value={item.Price} type="number" />
-                    <FormInput name={tableKeys.PriceExplanation.name} column="PriceExplanation" value={item.PriceExplanation} />
+                    <FormInput name={tableKeys.Money.name + "（单位：分）"} column="Money" value={item.Money} type="number" />
+                    <FormInput name={tableKeys.MoneyExplanation.name} column="MoneyExplanation" value={item.MoneyExplanation} />
                     <FormInput name={tableKeys.Inventory.name} column="Inventory" value={item.Inventory} type="number" />
                     <FormImage name={tableKeys.IntroduceURL.name} column="IntroduceURL" value={item.IntroduceURL} count={20} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />

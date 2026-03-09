@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API, urlParams } from "@/src/API"
+import { API } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -17,27 +17,36 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
+const playTags = [{ Value: false, Name: "未播放" }, { Value: true, Name: "已播放" }]
+const loveTags = [{ Value: false, Name: "未点赞" }, { Value: true, Name: "已点赞" }]
+const collectTags = [{ Value: false, Name: "未收藏" }, { Value: true, Name: "已收藏" }]
 const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
-    Name: Seer("", "收件人", true),
-    Phone: Seer("", "联系电话", true),
-    Province: Seer("", "省（自冶区）", true),
-    City: Seer("", "市", true),
-    District: Seer("", "区", true),
-    Detail: Seer("", "详细地址", true),
-    Code: Seer(0, "邮政号码", true),
+    User: Seer(0, "用户", true, (v) => v.Name),
+    Drama: Seer(0, "剧集", true, (v) => v.Name),
+    Play: Seer(false, "播放",   (v) => v ? "已播放" : "未播放" ),
+    Love: Seer(false, "点赞",   (v) => v ? "已点赞" : "未点赞" ),
+    Collect: Seer(false, "收藏", (v) =>   v ? "已收藏" : "未收藏"),
+    Score: Seer(0, "评分", true),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
-export default function AddressPage() {
+export default function CarePage() {
     const [loaded, setLoaded] = useState(false)
     const [open, setOpen] = useState(false)
-    const [address, setAddress] = useState()
+    const [care, setCare] = useState()
     const [, setNavs] = useLocalStorage("navs", [])
 
+    useEffect(() => {
+        setNavs([
+            { name: "短剧管理", url: "/admin" },
+            { name: "短剧评分等", url: "/admin/care" },
+        ])
+    }, [setNavs])
+
     const loadData = (offset, limit, key, value, back) => {
-        API.addressUser.get({ limit, offset, key, value }).then((result) => {
+        API.careAll.get({limit, offset, key, value}).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -54,27 +63,10 @@ export default function AddressPage() {
         setLoaded(false)
     }
 
-    const editDetail = (_address) => {
-        setAddress(_address)
+    const editDetail = (_care) => {
+        setCare(_care)
         setOpen(true)
     }
-
-    const addItem = () => {
-        let _address = { UserID: urlParams.get("user_id") }
-        Object.entries(tableKeys).forEach(([k, v]) => {
-            _address[k] = v.value
-        })
-        setAddress(_address)
-        setOpen(true)
-    }
-
-    useEffect(() => {
-        setNavs([
-            { name: "用户管理", url: "/admin" },
-            { name: "用户明细", url: "/admin/user" },
-            { name: `${urlParams.get("user_name")}的收货地址`, url: location },
-        ])
-    }, [setNavs])
 
     return (
         <div className="mx-4 w-auto">
@@ -83,27 +75,26 @@ export default function AddressPage() {
                 dict={tableKeys}
                 loadData={loadData}
                 actions={[{ name: "编辑内容", func: editDetail }]}
-                addItem={addItem}
             />
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!address || !address.ID ? "新添内容" : "编辑内容，ID：" + address.ID}</DialogTitle>
+                        <DialogTitle>{!care || !care.ID ? "新添内容" : "编辑内容，ID：" + care.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm data={address} saved={finishSave} />
+                    <ProfileForm data={care} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-function ProfileForm({ data, saved, edit }) {
+function ProfileForm({ data, saved }) {
     const [item, setItem] = useState(data)
-    const addressUpdate = (event) => {
-        API.addressUpdate.submit(event).then((result) => {
+    const careUpdate = (event) => {
+        API.careUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
                 setItem(result.Data)
@@ -116,18 +107,14 @@ function ProfileForm({ data, saved, edit }) {
     }
 
     return (
-        <form onSubmit={addressUpdate}  className="grid items-start gap-6"  aria-disabled={!edit}>
+        <form onSubmit={careUpdate} className="grid items-start gap-6"  >
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
-                    <input type="hidden" name="UserID" value={item.UserID} />
-                    <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
-                    <FormInput name={tableKeys.Phone.name} column="Phone" value={item.Phone} />
-                    <FormInput name={tableKeys.Province.name} column="Province" value={item.Province} />
-                    <FormInput name={tableKeys.City.name} column="City" value={item.City} />
-                    <FormInput name={tableKeys.District.name} column="District" value={item.District} />
-                    <FormInput name={tableKeys.Detail.name} column="Detail" value={item.Detail} />
-                    <FormInput name={tableKeys.Code.name} column="Code" value={item.Code} type="number" />
+                    <FormSelect name={tableKeys.Play.name} column="Play" value={item.Play} options={playTags} block={true} />
+                    <FormSelect name={tableKeys.Love.name} column="Love" value={item.Love} options={loveTags} block={true} />
+                    <FormSelect name={tableKeys.Collect.name} column="Collect" value={item.Collect} options={collectTags} block={true} />
+                    <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" block={true} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

@@ -20,7 +20,7 @@ import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
 import { StatusTags } from "@/lib/data"
 
-const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
+const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
     AvatarURL: Seer("", "头像", true, (v) => <CellAvatar url={v} />),
@@ -64,6 +64,7 @@ export default function UsersPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -110,7 +111,7 @@ export default function UsersPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!user || user.ID === 0 ? "新添内容" : "编辑内容，ID：" + user.ID}</DialogTitle>
+                        <DialogTitle>{!user || !user.ID ? "新添内容" : "编辑内容，ID：" + user.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={user} saved={finishSave} />
@@ -158,8 +159,8 @@ function ProfileForm({ data, saved, edit }) {
                     <FormInput name={tableKeys.Email.name} column="Email" value={item.Email} />
                     <FormInput name={tableKeys.LoginPassword.name} column="LoginPassword" value="" />
                     <FormInput name={tableKeys.TransactionPassword.name} column="TransactionPassword" value="" />
-                    <FormSelect name="默认地址" column="AddressID" value={item.AddressID} options={item.Addresses.map((address) => ({ ID: address.ID, Name: `${address.Name} - ${address.Phone} - ${address.Province} ${address.City} ${address.District} ${address.Detail}` }))} />
-                    <FormSelect name="默认银行" column="BankID" value={item.BankID} options={item.Banks.map((bank) => ({ ID: bank.ID, Name: `${bank.Name} -  ${bank.Bank} ${bank.Branch} - ${bank.Account}` }))} />
+                    <FormSelect name="默认地址" column="AddressID" value={item.AddressID} options={!item.Addresses ? [] : item.Addresses.map((address) => ({ ID: address.ID, Name: `${address.Name} - ${address.Phone} - ${address.Province} ${address.City} ${address.District} ${address.Detail}` }))} />
+                    <FormSelect name="默认银行" column="BankID" value={item.BankID} options={!item.Banks ? [] : item.Banks.map((bank) => ({ ID: bank.ID, Name: `${bank.Name} -  ${bank.Bank} ${bank.Branch} - ${bank.Account}` }))} />
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" />
                     <FormInput name={tableKeys.Money.name} column="Money" value={item.Money} type="number" />
                     <FormInput name={tableKeys.Withdrawal.name} column="Withdrawal" value={item.Withdrawal} type="number" />

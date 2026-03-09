@@ -19,7 +19,7 @@ import FormSelect from "@/components/form-select"
 import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
 
-const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', '红包', '其它'].map((item, index) => { return { Value: index, Name: item } })
 const tableKeys = {
     Name: Seer("", "名称", true),
     Description: Seer("", "说明", true),
@@ -55,6 +55,7 @@ export default function CategoryPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -86,7 +87,7 @@ export default function CategoryPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!category || category.ID === 0 ? "新添内容" : "编辑内容，ID：" + category.ID}</DialogTitle>
+                        <DialogTitle>{!category || !category.ID ? "新添内容" : "编辑内容，ID：" + category.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={category} saved={finishSave} />
@@ -97,10 +98,12 @@ export default function CategoryPage() {
 }
 
 function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const categoryUpdate = (event) => {
         API.categoryUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }
@@ -114,8 +117,8 @@ function ProfileForm({ data, saved }) {
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
-                    <FormImage name={tableKeys.IconURL.name} column="IconURL" value={item.IconURL} count={1} />
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
+                    <FormImage name={tableKeys.IconURL.name} column="IconURL" value={item.IconURL} count={1} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
                     <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} count={1} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />

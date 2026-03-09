@@ -16,18 +16,24 @@ import {
 import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
+import CellImage from "@/components/cell-image"
 
-const statusTags = ['未设置', "待付款", "待发货", "待收货", "取消", "退款"].map((item, index) => { return { ID: index, Name: item } })
-const kindTags = ['未设置', "兑换", "购买"].map((item, index) => { return { ID: index, Name: item } })
+const processTags = ["全部", "待支付", "待发货", "待收货", "已收货"].map((item, index) => { return { Value: index, Name: item } })
+const statusTags = ["无", "正常", "退货", "已退货", "取消"].map((item, index) => { return { Value: index, Name: item } })
+const kindTags = ['未设置', "兑换", "购买"].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
-    UserID: Seer(0, "用户ID"),
-    GoodsID: Seer(0, "商品ID"),
+    User: Seer("", "用户", true, (v) => v.Name),
+    Goods: Seer("", "商品", true, (v) => <CellImage url={!v.ImageURL || v.ImageURL.length < 1 ? "" : v.ImageURL[0]} />),
+    Address: Seer("", "地址", true, (v) => v.Detail),
+    CourierCompany: Seer("", "快递公司", true),
+    CourierNumber: Seer("", "快递单号", true),
     Kind: Seer(0, "支付方式", true),
     Quantity: Seer(0, "数量", true),
     Amount: Seer(0, "总额", true),
     Decount: Seer(0, "折扣", true),
     DecountDescription: Seer("", "折扣说明", true),
+    Process: Seer("", "状态", true, (v) => processTags[v].Name),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -58,6 +64,7 @@ export default function OrderPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -79,7 +86,7 @@ export default function OrderPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!order || order.ID === 0 ? "新添内容" : "编辑内容，ID：" + order.ID}</DialogTitle>
+                        <DialogTitle>{!order || !order.ID ? "新添内容" : "编辑内容，ID：" + order.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={order} saved={finishSave} />
@@ -109,11 +116,17 @@ function ProfileForm({ data, saved }) {
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
+                    <FormInput name={tableKeys.User.name} column="User" value={item.User.Name} type="text" block={true} />
+                    <FormInput name={tableKeys.Goods.name} column="Goods" value={item.Goods.Name} type="text" block={true} />
+                    <FormInput name={tableKeys.Address.name} column="Address" value={`${item.Address.Name} ${item.Address.Phone}：${item.Address.Province}${item.Address.City}${item.Address.District}${item.Address.Detail}`} type="text" block={true} />
+                    <FormInput name={tableKeys.CourierCompany.name} column="CourierCompany" value={item.CourierCompany} type="text" />
+                    <FormInput name={tableKeys.CourierNumber.name} column="CourierNumber" value={item.CourierNumber} type="text" />
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} block={true} />
                     <FormInput name={tableKeys.Quantity.name} column="Quantity" value={item.Quantity} type="number" block={true} />
                     <FormInput name={tableKeys.Amount.name} column="Amount" value={item.Amount} type="number" block={true} />
                     <FormInput name={tableKeys.Decount.name} column="Decount" value={item.Decount} type="number" block={true} />
                     <FormInput name={tableKeys.DecountDescription.name} column="DecountDescription" value={item.DecountDescription} block={true} />
+                    <FormSelect name={tableKeys.Process.name} column="Process" value={item.Process} options={processTags} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

@@ -17,16 +17,17 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
-const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
-const repeatTags = ['未设置', '日', '周', '月', '年'].map((item, index) => { return { ID: index, Name: item } })
-const kindTags = ["未设置", "积分", "现金"].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { Value: index, Name: item } })
+const repeatTags = ['未设置', '日', '周', '月', '年'].map((item, index) => { return { Value: index, Name: item } })
+const kindTags = ["未设置", "积分", "现金"].map((item, index) => { return { Value: index, Name: item } })
 const tableKeys = {
     Category: Seer("", "种类", true, (v) => v.Name),
     Name: Seer("", "名称", true),
     Description: Seer("", "描述", true),
     StartTime: Seer(0, "开始时间", true, (v) => v + ":00"),
-    EndTime: Seer(0, "开始时间", true, (v) => v + ":00"),
+    EndTime: Seer(0, "结束时间", true, (v) => v + ":00"),
     Kind: Seer("", "获利类型", true, (v) => kindTags[v].Name),
+    Sort: Seer("", "排序", true),
     Score: Seer(0, "积分", true),
     Money: Seer(0, "现金", true, (v) => (v / 100).toLocaleString("zh-CN", {style: "currency", currency: "CNY", minimumFractionDigits: 2, maximumFractionDigits: 2})),
     Repeat: Seer("", "重复", true, (v) => repeatTags[v].Name),
@@ -60,6 +61,7 @@ export default function CardPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -91,7 +93,7 @@ export default function CardPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!card || card.ID === 0 ? "新添内容" : "编辑内容，ID：" + card.ID}</DialogTitle>
+                        <DialogTitle>{!card || !card.ID ? "新添内容" : "编辑内容，ID：" + card.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={card} saved={finishSave} />
@@ -139,8 +141,9 @@ function ProfileForm({ data, saved }) {
                     <FormInput name={tableKeys.Name.name} column="Name" value={item.Name} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
                     <FormSelect name={tableKeys.Category.name} column="CategoryID" value={item.CategoryID} options={categories} />
-                    <FormInput type="number" name={tableKeys.StartTime.name} column="StartTime" value={item.StartTime} />
-                    <FormInput type="number" name={tableKeys.EndTime.name} column="EndTime" value={item.EndTime} />
+                    <FormInput type="number" name={tableKeys.StartTime.name + "（24小时制）"} column="StartTime" value={item.StartTime} />
+                    <FormInput type="number" name={tableKeys.EndTime.name + "（24小时制）"} column="EndTime" value={item.EndTime} />
+                    <FormInput type="number" name={tableKeys.Sort.name} column="Sort" value={item.Sort} />
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
                     <FormInput type="number" name={tableKeys.Score.name} column="Score" value={item.Score} />
                     <FormInput type="number" name={tableKeys.Money.name + "（单位：分）"} column="Money" value={item.Money} />

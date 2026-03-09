@@ -12,8 +12,10 @@ export const API = {
     bankAll: `${baseUrl}/bank/all`,
     bankUser: `${baseUrl}/bank/user/${urlParams.get("user_id")}`,
     bankUpdate: `${baseUrl}/bank/update`,
-    cardAll: `${baseUrl}/card/all`,
+    cardAll: `${baseUrl}/card/all/category/0`,
     cardUpdate: `${baseUrl}/card/update`,
+    careAll: `${baseUrl}/care/all`,
+    careUpdate: `${baseUrl}/care/update`,
     categoryAll: `${baseUrl}/category/all`,
     categoryUpdate: `${baseUrl}/category/update`,
     chapterAll: `${baseUrl}/chapter/all`,
@@ -23,6 +25,7 @@ export const API = {
     commentUpdate: `${baseUrl}/comment/update`,
     dramaAll: `${baseUrl}/drama/all`,
     dramaUpdate: `${baseUrl}/drama/update`,
+    dramaPromotional: `${baseUrl}/drama/promotional/all`,
     dramaTags: `${baseUrl}/drama/tags/all`,
     checkAll: `${baseUrl}/check/all`,
     checkUpdate: `${baseUrl}/check/update`,
@@ -38,7 +41,7 @@ export const API = {
     moneyTopUp: `${baseUrl}/money/topup/all`,
     moneyWithdrawal: `${baseUrl}/money/withdrawal/all`,
     moneyUpdate: `${baseUrl}/money/update`,
-    orderAll: `${baseUrl}/order/all`,
+    orderAll: `${baseUrl}/order/all/process/0/status/0`,
     orderUpdate: `${baseUrl}/order/update`,
     resourcePresigned: `${baseUrl}/resources/presigned`,
     userAll: `${baseUrl}/user/all`,
@@ -65,24 +68,25 @@ String.prototype.request = function (method, data = undefined) {
 String.prototype.submit = function (event) {
     event.preventDefault()
     const formData = new FormData(event.target)
-    if (formData.keys() === 1){
-        toast.error("没有新的数据")
-        return 
-    }
     let data = {};
     formData.forEach((value, key) => {
         let arr = key.split(".")
         if (arr.length == 1) {
-            data[key] = key == "ID" ? +value : value
+            data[key] = key.slice(-2) == "ID" ? +value : value
         } else {
             data[arr[0]] = [...(data[arr[0]] ?? []), value]
         }
     })
+    if (Object.keys(data).length === 1) {
+        toast.error("没有新的数据")
+        return 
+    }
     const inputs = event.target.querySelectorAll("input[type='number']:enabled")
 
     inputs.forEach(element => {
         data[element.getAttribute("name")] = +element.value
     })
+    
     return this.post(data)
 }
 

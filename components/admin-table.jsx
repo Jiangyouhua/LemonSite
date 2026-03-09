@@ -39,7 +39,7 @@ export default function AdminTable({ loaded, dict, loadData, addItem, actions })
     const [key, setKey] = useState("")
     const [value, setValue] = useState("")
     const [page, setPage] = useState(0) // 当前页
-    const [limit, setLimit] = useState(10)  // 各页数
+    const [limit, setLimit] = useState(localStorage.getItem(location.href) || 10)  // 各页数
     const [items, setItems] = useState([])
     const [total, setTotal] = useState(0)
     const [pageTags, setPageTags] = useState([]) // 可操作页面
@@ -59,11 +59,11 @@ export default function AdminTable({ loaded, dict, loadData, addItem, actions })
         loadData(page, limit, key, value, finishBack)
     }
 
-    const limitUpdate = (value) => {
-        const _limie = +value
-        setLimit(_limie)
-        pageTagsFormat(page, _limie, total)
-        loadData(page, limit, key, value, finishBack)
+    const limitUpdate = (_value) => {
+        setLimit(+_value)
+        localStorage.setItem(location.href, _value)
+        pageTagsFormat(page, _value, total)
+        loadData(page, _value, key, value, finishBack)
     }
 
     const pageUpdate = (action, number) => {

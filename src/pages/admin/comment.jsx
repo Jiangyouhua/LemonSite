@@ -17,7 +17,7 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
-const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', '未启用', '已启用'].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
     User: Seer(0, "用户", true, (v) => v.Name),
@@ -54,6 +54,7 @@ export default function CommentPage() {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -75,7 +76,7 @@ export default function CommentPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!comment || comment.ID === 0 ? "新添内容" : "编辑内容，ID：" + comment.ID}</DialogTitle>
+                        <DialogTitle>{!comment || !comment.ID ? "新添内容" : "编辑内容，ID：" + comment.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={comment} saved={finishSave} />
@@ -86,10 +87,12 @@ export default function CommentPage() {
 }
 
 function ProfileForm({ data, saved }) {
+    const [item, setItem] = useState(data)
     const commentUpdate = (event) => {
         API.commentUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
+                setItem(result.Data)
             } else {
                 toast.error("数据更新失败，请稍后再试")
             }

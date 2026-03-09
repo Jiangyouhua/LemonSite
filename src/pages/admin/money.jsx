@@ -17,7 +17,7 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
-const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { Value: index, Name: item } })
 
 const tableKeys = {
     UserID: Seer(0, "用户ID"),
@@ -53,6 +53,7 @@ export default function MoneyPage({ kind, name, url }) {
     }
 
     const finishSave = () => {
+         toast.success("成功保存更新的内容")
         setLoaded(false)
     }
 
@@ -74,7 +75,7 @@ export default function MoneyPage({ kind, name, url }) {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!money || money.ID === 0 ? "新添内容" : "编辑内容，ID：" + money.ID}</DialogTitle>
+                        <DialogTitle>{!money || money.ID ? "新添内容" : "编辑内容，ID：" + money.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
                     <ProfileForm data={money} saved={finishSave} />
