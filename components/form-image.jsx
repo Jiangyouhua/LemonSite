@@ -107,7 +107,7 @@ export default function FormImage({ column, name, count, value, block }) {
                 })}
             </div>
             <div className="text-right  ">
-                {disabled || block || selectedFiles.length == 0 ? <></> : <Button disabled={selectedFiles.filter(file => !file.status).length === 0} onClick={uploadFile}>共可选 {count} 张图片</Button>}
+                {disabled || block || selectedFiles.length == 0 ? <></> : <Button disabled={selectedFiles.filter(file => !file.status).length === 0} onClick={uploadFile}>共可选 {count} 张图片，上传</Button>}
             </div>
         </div>
     )

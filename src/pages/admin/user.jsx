@@ -164,6 +164,7 @@ function ProfileForm({ data, saved, edit }) {
                     <FormInput name={tableKeys.Score.name} column="Score" value={item.Score} type="number" />
                     <FormInput name={tableKeys.Money.name} column="Money" value={item.Money} type="number" />
                     <FormInput name={tableKeys.Withdrawal.name} column="Withdrawal" value={item.Withdrawal} type="number" />
+                    <FormSelect name={tableKeys.Group.name} column="Group" value={item.Group} options={groupTags} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={StatusTags} />
                 </div>
             </ScrollArea>
