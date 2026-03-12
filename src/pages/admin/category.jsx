@@ -18,8 +18,8 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
+import { statusTags } from "@/lib/data"
 
-const statusTags = ['未设置', '红包', '其它'].map((item, index) => { return { Value: index, Name: item } })
 const tableKeys = {
     Name: Seer("", "名称", true),
     Description: Seer("", "说明", true),

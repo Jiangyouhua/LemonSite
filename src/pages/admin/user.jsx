@@ -18,7 +18,7 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
-import { StatusTags } from "@/lib/data"
+import { statusTags } from "@/lib/data"
 
 const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { Value: index, Name: item } })
 
@@ -41,7 +41,7 @@ const tableKeys = {
     Weichat: Seer("", "微信"),
     Token: Seer("", "Token"),
     Group: Seer(0, "用户组", true, (v) => groupTags[v].Name),
-    Status: Seer("", "状态", true, (v) => StatusTags[v].Name),
+    Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
 export default function UsersPage() {
@@ -165,7 +165,7 @@ function ProfileForm({ data, saved, edit }) {
                     <FormInput name={tableKeys.Money.name} column="Money" value={item.Money} type="number" />
                     <FormInput name={tableKeys.Withdrawal.name} column="Withdrawal" value={item.Withdrawal} type="number" />
                     <FormSelect name={tableKeys.Group.name} column="Group" value={item.Group} options={groupTags} />
-                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={StatusTags} />
+                    <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>
             <Button type="submit" >保存更新</Button>

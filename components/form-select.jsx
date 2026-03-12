@@ -13,7 +13,7 @@ import { Input } from "./ui/input"
 
 // options = [{ID: int, Name: string}]
 export default function FormSelect({ name, column, value, options, block }) {
-    const placeholder = !value || options.length == 0 ? "请选择" : options.find((_option) => _option.Value == value).Name || "请选择"
+    const placeholder = !value || options.length == 0 || !options.find((_option) => _option.Value == value) ? "请选择" : options.find((_option) => _option.Value == value).Name 
     const [disabled, setDisabled] = useState(true)
     const [option, setOption] = useState(value)
 

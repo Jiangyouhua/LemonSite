@@ -20,9 +20,7 @@ import FormTags from "@/components/form-tags"
 import FormImage from "@/components/form-image"
 import FormDate from "@/components/form-date"
 import CellImage from "@/components/cell-image"
-import { Share } from "lucide-react"
-
-const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => { return { Value: index, Name: item } })
+import { statusTags } from "@/lib/data"
 
 const tableKeys = {
     Name: Seer("", "名称", true),
