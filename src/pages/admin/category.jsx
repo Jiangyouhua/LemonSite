@@ -20,11 +20,14 @@ import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
 import { statusTags } from "@/lib/data"
 
+const signTags = ['未设置', '非签到', '签到'].map((item, index) => { return { ID: index, Name: item } })
+
 const tableKeys = {
     Name: Seer("", "名称", true),
     Description: Seer("", "说明", true),
     ImageURL: Seer("", "页面图", true, (v) => <CellAvatar url={v} />),
     IconURL: Seer("", "类型ICON", true, (v) => <CellAvatar url={v} />),
+    Sign: Seer("", "签到项", true, (v) => signTags[v].Name),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -121,6 +124,7 @@ function ProfileForm({ data, saved }) {
                     <FormImage name={tableKeys.IconURL.name} column="IconURL" value={item.IconURL} count={1} />
                     <FormInput name={tableKeys.Description.name} column="Description" value={item.Description} />
                     <FormImage name={tableKeys.ImageURL.name} column="ImageURL" value={item.ImageURL} count={1} />
+                    <FormSelect name={tableKeys.Sign.name} column="Sign" value={item.Sign} options={signTags} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

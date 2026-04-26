@@ -17,8 +17,8 @@ import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 
-const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { Value: index, Name: item } })
-const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { Value: index, Name: item } })
+const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { ID: index, Name: item } })
+const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
     User: Seer(0, "用户", true, (v) => v.Name),
@@ -27,7 +27,7 @@ const tableKeys = {
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
-export default function MessageSystemPage() {
+export default function SystemMessagePage() {
     const [loaded, setLoaded] = useState(false)
     const [open, setOpen] = useState(false)
     const [message, setMessage] = useState()
@@ -36,7 +36,7 @@ export default function MessageSystemPage() {
     useEffect(() => {
         setNavs([
             { name: "信息管理", url: "/admin" },
-            { name: "系统信息", url: "/admin/message_system" },
+            { name: "系统信息", url: "/admin/system_message" },
         ])
     }, [setNavs])
 

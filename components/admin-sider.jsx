@@ -1,7 +1,7 @@
 
 import * as React from "react"
 import { AdminMenu } from "@/components/admin-menu"
-import { AdminOption } from "@/components/admin-option"
+// import { AdminOption } from "@/components/admin-option"
 import {
   Sidebar,
   SidebarContent,
@@ -11,12 +11,15 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { AdminLogo } from "./admin-logo"
+import { Link } from "react-router-dom"
 
 export default function AdminSider({ ...props }) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <AdminLogo />
+        <Link to="/admin">
+          <AdminLogo />
+        </Link>
         <Separator />
       </SidebarHeader>
       <SidebarContent>

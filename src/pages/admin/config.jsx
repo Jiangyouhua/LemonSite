@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useLocalStorage } from "@uidotdev/usehooks"
 import { toast } from "sonner"
-import { API } from "@/src/API"
+import { API, urlParams } from "@/src/API"
 import { Seer } from "@/lib/seer"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -16,41 +16,22 @@ import {
 import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
-
-const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { ID: index, Name: item } })
-const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
+import { statusTags } from "@/lib/data"
 
 const tableKeys = {
-    User: Seer(0, "用户", true, (v) => v.Name),
-    Group: Seer(0, "用户组", true, (v) => groupTags[v].Name),
-    Content: Seer("", "内容", true),
+    Key: Seer("", "键", true),
+    Value: Seer("", "值", true),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
-export default function MessageUserPage() {
+export default function ConfigPage() {
     const [loaded, setLoaded] = useState(false)
     const [open, setOpen] = useState(false)
-    const [message, setMessage] = useState()
+    const [config, setConfig] = useState()
     const [, setNavs] = useLocalStorage("navs", [])
 
-    useEffect(() => {
-        setNavs([
-            { name: "信息管理", url: "/admin" },
-            { name: "用户信息", url: "/admin/user_message" },
-        ])
-    }, [setNavs])
-
-    const addItem = () => {
-        let _message = {}
-        Object.entries(tableKeys).forEach(([k, v]) => {
-            _message[k] = v.value
-        })
-        setMessage(_message)
-        setOpen(true)
-    }
-
     const loadData = (offset, limit, key, value, back) => {
-        API.messageToUser.get({limit, offset, key, value}).then((result) => {
+        API.configAll.get({ limit, offset, key, value }).then((result) => {
             setLoaded(true)
             if (result.Succeed) {
                 back(result.Data)
@@ -67,10 +48,27 @@ export default function MessageUserPage() {
         setLoaded(false)
     }
 
-    const editDetail = (_message) => {
-        setMessage(_message)
+    const editDetail = (_config) => {
+        setConfig(_config)
         setOpen(true)
     }
+
+    const addItem = () => {
+        let _config = { UserID: urlParams.get("user_id") }
+        Object.entries(tableKeys).forEach(([k, v]) => {
+            _config[k] = v.value
+        })
+        setConfig(_config)
+        setOpen(true)
+    }
+
+    useEffect(() => {
+        setNavs([
+            { name: "用户管理", url: "/admin" },
+            { name: "用户明细", url: "/admin/user" },
+            { name: "系统配置", url: location },
+        ])
+    }, [setNavs])
 
     return (
         <div className="mx-4 w-auto">
@@ -86,20 +84,20 @@ export default function MessageUserPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-140">
                     <DialogHeader>
-                        <DialogTitle>{!message || !message.ID ? "新添内容" : "编辑内容，ID：" + message.ID}</DialogTitle>
+                        <DialogTitle>{!config || !config.ID ? "新添内容" : "编辑内容，ID：" + config.ID}</DialogTitle>
                         <DialogDescription>点击锁图标，可编辑</DialogDescription>
                     </DialogHeader>
-                    <ProfileForm data={message} saved={finishSave} />
+                    <ProfileForm data={config} saved={finishSave} />
                 </DialogContent>
             </Dialog>
         </div>
     )
 }
 
-function ProfileForm({ data, saved }) {
+function ProfileForm({ data, saved, edit }) {
     const [item, setItem] = useState(data)
-    const messageUpdate = (event) => {
-        API.messageUpdate.submit(event).then((result) => {
+    const configUpdate = (event) => {
+        API.configUpdate.submit(event).then((result) => {
             if (result.Succeed) {
                 saved()
                 setItem(result.Data)
@@ -112,12 +110,12 @@ function ProfileForm({ data, saved }) {
     }
 
     return (
-        <form onSubmit={messageUpdate} className="grid items-start gap-6"  >
+        <form onSubmit={configUpdate}  className="grid items-start gap-6"  aria-disabled={!edit}>
             <ScrollArea className="h-140 m-[-12px] p-[12px]">
                 <div >
                     <input type="hidden" name="ID" value={item.ID} />
-                    <FormSelect name={tableKeys.Group.name} column="Group" value={item.Group} options={groupTags} />
-                    <FormInput name={tableKeys.Content.name} column="Content" value={item.Content} />
+                    <FormInput name={tableKeys.Key.name} column="Key" value={item.Key} />
+                    <FormInput name={tableKeys.Value.name} column="Value" value={item.Value} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

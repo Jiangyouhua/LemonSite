@@ -19,16 +19,16 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import FormTags from "@/components/form-tags"
 import FormImage from "@/components/form-image"
+import { statusTags } from "@/lib/data"
 
-const statusTags = ['未设置', '下线', '上线', '推广', '广告'].map((item, index) => { return { Value: index, Name: item } })
-const kindTags = ['未设置', '积分', '价格'].map((item, index) => { return { Value: index, Name: item } })
+const kindTags = ['未设置', '积分', '价格'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
     ImageURL: Seer([], "产品图片", true, (v) => <CellImage url={!v || v.length < 1 ? "" : v[0]} />),
     Name: Seer("", "名称", true),
     Slogan: Seer("", "广告语", true),
     Description: Seer("", "说明", true),
-    Promotional: Seer("", "促销语", true),
+    Promotional: Seer("", "促销词", true),
     Tags: Seer("", "分类标签", true),
     Kind: Seer("", "类型", true, (v) => kindTags[v].Name),
     Score: Seer(0, "积分", true),
@@ -37,6 +37,7 @@ const tableKeys = {
     MoneyExplanation: Seer("", "价格说明", true),
     Inventory: Seer("", "库存", true),
     IntroduceURL: Seer([], "推广图片", true, (v) => <CellImage url={!v || v.length < 1 ? "" : v[0]} />),
+    Recommendation: Seer(0, "推荐数", true),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -127,7 +128,7 @@ function ProfileForm({ data, saved }) {
     const goodsPromotional = (back) => {
         API.goodsPromotional.get().then((result) => {
             if (result.Succeed) {
-                back()
+                back(result.Data)
             } else {
                 toast.error(result.Message)
             }
@@ -162,6 +163,7 @@ function ProfileForm({ data, saved }) {
                     <FormInput name={tableKeys.MoneyExplanation.name} column="MoneyExplanation" value={item.MoneyExplanation} />
                     <FormInput name={tableKeys.Inventory.name} column="Inventory" value={item.Inventory} type="number" />
                     <FormImage name={tableKeys.IntroduceURL.name} column="IntroduceURL" value={item.IntroduceURL} count={20} />
+                    <FormInput name={tableKeys.Recommendation.name} column="Recommendation" value={item.Recommendation} type="number" />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

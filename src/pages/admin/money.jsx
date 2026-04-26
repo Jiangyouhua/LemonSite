@@ -16,7 +16,8 @@ import {
 import AdminTable from "@/components/admin-table"
 import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
-import { statusTags } from "@/lib/data"
+
+const statusTags = ['未设置', '待处理', '已处理'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
     UserID: Seer(0, "用户ID"),

@@ -22,8 +22,10 @@ import CommentPage from './pages/admin/comment'
 import ChapterPage from './pages/admin/chapter'
 import TopUpPage from './pages/admin/top-up'
 import WithdrawalPage from './pages/admin/withdrawal'
-import MessageSystemPage from './pages/admin/message-system'
+import SystemMessagePage from './pages/admin/message-system'
 import MessageUserPage from './pages/admin/message-user'
+import ChatPage from './pages/admin/chat'
+import ConfigPage from './pages/admin/config'
 
 function App() {
   const [auth, setAuth] = useLocalStorage("auth", false)
@@ -44,7 +46,6 @@ function App() {
           <Route path='/' element={<HomePage />} />
           <Route path='/login' element={<LoginPage />} />
           <Route path='/admin' element={<AdminRoutes />} >
-          
             <Route index element={<IndexPage />} />
             <Route path='address' element={<AddressPage />} />
             <Route path='bank' element={<BankPage />} />
@@ -59,10 +60,11 @@ function App() {
             <Route path='goods' element={<GoodsPage />} />
             <Route path='top_up' element={<TopUpPage />} />
             <Route path='withdrawal' element={<WithdrawalPage />} />
-            <Route path='message_system' element={<MessageSystemPage />} />
-            <Route path='message_user' element={<MessageUserPage />} />
+            <Route path='system_message' element={<SystemMessagePage />} />
+            <Route path='system_config' element={<ConfigPage />} />
             <Route path='order' element={<OrderPage />} />
             <Route path='user' element={<UsersPage />} />
+            <Route path='chat' element={<ChatPage />} />
           </Route>
         </Routes>
         </NavContext.Provider>

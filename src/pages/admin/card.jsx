@@ -18,8 +18,7 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import { statusTags } from "@/lib/data"
 
-const signTags = ['未设置', '非签到', '签到'].map((item, index) => { return { Value: index, Name: item } })
-const kindTags = ["未设置", "积分", "现金"].map((item, index) => { return { Value: index, Name: item } })
+const kindTags = ["未设置", "积分", "现金"].map((item, index) => { return { ID: index, Name: item } })
 const tableKeys = {
     Category: Seer("", "种类", true, (v) => v.Name),
     Name: Seer("", "名称", true),
@@ -30,7 +29,6 @@ const tableKeys = {
     Sort: Seer("", "排序", true),
     Score: Seer(0, "积分", true),
     Money: Seer(0, "现金", true, (v) => (v / 100).toLocaleString("zh-CN", {style: "currency", currency: "CNY", minimumFractionDigits: 2, maximumFractionDigits: 2})),
-    Sign: Seer("", "签到", true, (v) => signTags[v].Name),
     Status: Seer("", "状态", true, (v) => statusTags[v].Name),
 }
 
@@ -147,7 +145,6 @@ function ProfileForm({ data, saved }) {
                     <FormSelect name={tableKeys.Kind.name} column="Kind" value={item.Kind} options={kindTags} />
                     <FormInput type="number" name={tableKeys.Score.name} column="Score" value={item.Score} />
                     <FormInput type="number" name={tableKeys.Money.name + "（单位：分）"} column="Money" value={item.Money} />
-                    <FormSelect name={tableKeys.Sign.name} column="Sign" value={item.Sign} options={signTags} />
                     <FormSelect name={tableKeys.Status.name} column="Status" value={item.Status} options={statusTags} />
                 </div>
             </ScrollArea>

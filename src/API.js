@@ -6,6 +6,8 @@ export const urlParams = new URLSearchParams(window.location.search);
 export const API = {
     sendCode: `${baseUrl}/user/send/code`,
     login: `${baseUrl}/user/email/password`,
+    configAll: `${baseUrl}/config/all`,
+    configUpdate: `${baseUrl}/config/update`,
     addressAll: `${baseUrl}/address/all`,
     addressUser: `${baseUrl}/address/user/${urlParams.get("user_id")}`,
     addressUpdate: `${baseUrl}/address/update`,

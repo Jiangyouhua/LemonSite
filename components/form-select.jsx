@@ -13,12 +13,13 @@ import { Input } from "./ui/input"
 
 // options = [{ID: int, Name: string}]
 export default function FormSelect({ name, column, value, options, block }) {
-    const placeholder = !value || options.length == 0 || !options.find((_option) => _option.Value == value) ? "请选择" : options.find((_option) => _option.Value == value).Name 
+    const placeholder = !value || options.length == 0 || !options.find((_option) => _option.ID == value) ? "请选择" : options.find((_option) => _option.ID == value).Name 
     const [disabled, setDisabled] = useState(true)
     const [option, setOption] = useState(value)
 
     const selectUpdate = (_value) => {
-        setOption(options.find((_option) => _option.Name == _value).Value)
+        let item = options.find((_option) => _option.Name == _value)
+        setOption(item ? item.ID : "0")
     }
     
     return (
@@ -36,7 +37,7 @@ export default function FormSelect({ name, column, value, options, block }) {
                 </SelectTrigger>
                 <SelectContent>
                     {options.map((_option) => {
-                        return (<SelectItem key={column + "_" + _option.Value} value={_option.Name}>{_option.Name}</SelectItem>)
+                        return (<SelectItem key={column + "_" + _option.ID} value={_option.Name}>{_option.Name}</SelectItem>)
                     })}
                 </SelectContent>
             </Select>

@@ -15,7 +15,7 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
-import { AdminMenus } from '../lib/data'
+import { AdminMenus } from "@/lib/data"
 import { useLocalStorage } from "@uidotdev/usehooks"
 
 export function AdminMenu() {

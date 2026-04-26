@@ -18,9 +18,9 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import CellImage from "@/components/cell-image"
 
-const processTags = ["全部", "待支付", "待发货", "待收货", "已收货"].map((item, index) => { return { Value: index, Name: item } })
-const statusTags = ["无", "正常", "退货", "已退货", "取消"].map((item, index) => { return { Value: index, Name: item } })
-const kindTags = ['未设置', "兑换", "购买"].map((item, index) => { return { Value: index, Name: item } })
+const processTags = ["全部", "待支付", "待发货", "待收货", "已收货"].map((item, index) => { return { ID: index, Name: item } })
+const statusTags = ["无", "正常", "退货", "已退货", "取消"].map((item, index) => { return { ID: index, Name: item } })
+const kindTags = ['未设置', "兑换", "购买"].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
     User: Seer("", "用户", true, (v) => v.Name),

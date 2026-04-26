@@ -18,9 +18,9 @@ import FormInput from "@/components/form-input"
 import FormSelect from "@/components/form-select"
 import { statusTags } from "@/lib/data"
 
-const playTags = [{ Value: false, Name: "未播放" }, { Value: true, Name: "已播放" }]
-const loveTags = [{ Value: false, Name: "未点赞" }, { Value: true, Name: "已点赞" }]
-const collectTags = [{ Value: false, Name: "未收藏" }, { Value: true, Name: "已收藏" }]
+const playTags = [{ ID: false, Name: "未播放" }, { ID: true, Name: "已播放" }]
+const loveTags = [{ ID: false, Name: "未点赞" }, { ID: true, Name: "已点赞" }]
+const collectTags = [{ ID: false, Name: "未收藏" }, { ID: true, Name: "已收藏" }]
 
 const tableKeys = {
     User: Seer(0, "用户", true, (v) => v.Name),

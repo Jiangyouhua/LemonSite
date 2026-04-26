@@ -86,6 +86,7 @@ export default function DramaPage() {
         Object.entries(tableKeys).forEach(([k, v]) => {
             _drama[k] = v.value
         })
+        _drama.ReleaseDate = new Date().toISOString()
         setDrama(_drama)
         setOpen(true)
     }

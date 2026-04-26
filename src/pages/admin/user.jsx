@@ -20,14 +20,14 @@ import FormImage from "@/components/form-image"
 import CellAvatar from "@/components/cell-avatar"
 import { statusTags } from "@/lib/data"
 
-const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { Value: index, Name: item } })
+const groupTags = ['超级管理员', '管理员', ' VIP用户', '用户'].map((item, index) => { return { ID: index, Name: item } })
 
 const tableKeys = {
     AvatarURL: Seer("", "头像", true, (v) => <CellAvatar url={v} />),
+    Phone: Seer("", "手机", true),
     Name: Seer("", "姓名", true),
     RealName: Seer("", "真实姓名", true),
     CardID: Seer("", "身份证号码"),
-    Phone: Seer("", "手机", true),
     Email: Seer("", "邮箱", true),
     LoginPassword: Seer("", "登录密码"),
     TransactionPassword: Seer("", "交易密码"),
