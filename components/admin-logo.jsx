@@ -14,7 +14,7 @@ export function AdminLogo() {
             >
               <img src="/images/favicon.svg" alt="Lemon Site Logo" className="size-8 rounded-lg" />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">柠檬短剧</span>
+                <span className="truncate font-medium">极简短剧</span>
                 <span className="truncate text-xs">发现·不一样的精彩</span>
               </div>
             </SidebarMenuButton>
